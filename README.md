@@ -4,7 +4,7 @@ TidyVar - variant calling in next generation sequencing data.
 TidyVar.m is a Wolfram Mathematica package for variant calling in next generation sequencing data. Requires Mathematica and Samtools and works only under Unix type operation systems (Linux, MacOS).
 
 Output:
-A VCF file.
+a VCF file.
 
 Input: 
 1) Bam files (one bam file per individual) containing the NGS reads mapped to the genome. Each bam file must be sorted and indexed (look for Samtools help if you don't know what this means); 
