@@ -16,3 +16,5 @@ Input:
 3) (Optional) a BED file defining the regions to call variants in. Useful for targeted sequencing projects, like exome sequencing. TidyVar is faster to call variants in specified regions rather than in whole genome even if the majority of reads map to the targeted regions anyway.
 
 4) (Optional) a single target region in the format "15:12345-16789". Useful if you sequenced a single consecutive region, or if you just want to try quickly on a small region if TidyVar works. This option can be combined with the bed file option above.
+
+Details soon!
