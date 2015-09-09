@@ -17,4 +17,4 @@ Input:
 
 4) (Optional) a single target region in the format "15:12345-16789". Useful if you sequenced a single consecutive region, or if you just want to try quickly on a small region if TidyVar works. This option can be combined with the bed file option above.
 
-Additional details and the code will appear here soon!
+Put the files TidyVar.m (the package itself) and TidyVar.example.nb (usage example) in the same directory. Then open TidyVar.example.nb in Wolfram Mathematica and follow the instructions in the file.
