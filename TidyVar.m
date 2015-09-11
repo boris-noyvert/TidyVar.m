@@ -53,6 +53,9 @@ GetReadsFromBamFiles
 OptimiseTargets
 
 
+CheckFileExistence
+
+
 CheckSamtoolsIsInstalled
 
 
@@ -62,7 +65,40 @@ CheckBamIsIndexed
 CheckBamFiles
 
 
+SamtoolsPath
+
+
 GenomeFastaFile
+
+
+FastaFileName
+
+
+ExtendTargetsBy
+
+
+MinimalBaseSequencingScore
+
+
+MinimalReadMappingScore
+
+
+MinimalCoverage
+
+
+SamtoolsFlagFilter
+
+
+VariantThreshold
+
+
+LogFileName
+
+
+FailedLogFileName
+
+
+SaveCoverage
 
 
 Begin["`Private`"];
@@ -293,7 +329,7 @@ clusters=If[FreeQ[nonemptyclusters,1],{{},{},Flatten[clusters]},{Flatten[cluster
 
 (*Show[PlotClusteredReadCounts2D[readcounts[[#]]&/@Append[psok[[#]]&/@clusters,psinsufficientreads]],PlotLabel\[Rule]Round[clusterdist,0.1]]//Print;*)
 {(*readcounts[[#]]&/@*)
-Append[psok[[#]]&/@clusters,psinsufficientreads],(*Min[clusterdist[[All,2]]]*)clusterdist(1- (1/n)Length[psinsufficientreads])
+Append[psok[[#]]&/@clusters,psinsufficientreads],(*Min[clusterdist[[All,2]]]*)clusterdist(1- Length[psinsufficientreads]/n)
 (*,
 MinMeanMax/@(angles[[#]]&/@clusters)*)}
 ]
@@ -1331,7 +1367,7 @@ outputvcffile is the name of the file to save the variants in.
 Options[CallVariants]={(*SampleLabels\[Rule]"FromFileNames"*)FailedLogFileName->Automatic,LogFileName->Automatic,OptimiseTargets->True};
 CallVariants[bamfiles_,outputvcffile_String,targets0_:"",region0_:"",optns:OptionsPattern[{LoadBedTargets,FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Genotype2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{flbam,samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,varcount,logfile,logstream,coveragefile,region,samtoolscheck,tm,tm0,targets,optimisedtargets,optnstoreport,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass},
 
-optnstoreport={FastaFileName,ExtendTargetsBy,MinimalBaseSequencingScore,MinimalReadMappingScore,MinimalCoverage,SamtoolsFlagFilter,VariantThreshold,LogFileName,FailedLogFileName};
+optnstoreport={FastaFileName,ExtendTargetsBy,MinimalBaseSequencingScore,MinimalReadMappingScore,MinimalCoverage,SamtoolsFlagFilter,VariantThreshold,SaveCoverage,LogFileName,FailedLogFileName};
 
 tm0=DateList[];
 
