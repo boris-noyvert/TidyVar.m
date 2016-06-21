@@ -22,11 +22,11 @@
 BeginPackage["TidyVar`"];
 
 
-$TidyVarVersion="0.1.7";
+$TidyVarVersion="0.2.1";
 
 
-Print["TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2015."];
-If[$OperatingSystem==="Windows",Print["Sorry, TidyVar doesn't work under Windows operating system, please try it on Linux or MacOS.\nAborting."];Abort[]];
+Print["TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016."];
+If[$OperatingSystem==="Windows",Print["Sorry, TidyVar doesn't work under Windows operating system, please try it on Linux or MacOS."](*;Abort[]*)];
 
 
 CallVariants
@@ -101,6 +101,27 @@ FailedLogFileName
 SaveCoverage
 
 
+PlotClusteredReadCounts2D
+
+
+GenotypeReadCounts
+
+
+LoadVCF
+
+
+LastVCFHeader
+
+
+ConvertVcfLineToVariant
+
+
+ConvertVariantToVcfLine
+
+
+RemoveDummyAlleles
+
+
 Begin["`Private`"];
 
 
@@ -110,7 +131,8 @@ If there is only one argument (chr) the function returns it in the string form."
 MakeCoordinateString[""]:="";
 MakeCoordinateString[x_String]:=Block[{trimmed},trimmed=StringTrim[x,("'"|" "|"\t"|"\"")..];
 If[trimmed==="","","'"<>trimmed<>"'"]];
-MakeCoordinateString[x__]:=Module[{arg},arg=ToString/@Flatten[{x}];"'"<>arg[[1]]<>If[Length[arg]>=3,":"<>arg[[2]]<>"-"<>arg[[3]],""]<>"'"];
+MakeCoordinateString[x__]:=Module[{arg,l},arg=ToString/@Flatten[{x}];
+l=Length[arg];"'"<>arg[[1]]<>Which[l==1,"",l==2,":"<>arg[[2]],l>=3,":"<>arg[[2]]<>"-"<>arg[[3]]]<>"'"];
 
 
 ExtractCoordinatesFromString::usage="ExtractCoordinatesFromString extracts coordinates in the form {chr,coord1,coord2} from a string like \"'chr:coord1-coord2'\"";
@@ -240,36 +262,157 @@ PrintError[x_List,op:OptionsPattern[PrintError]]:=PrintError[StringJoinWith[ToSt
 PrintError[x__,op:OptionsPattern[PrintError]]:=PrintError[{x},op];
 
 
-(*
-Moves the points a little bit out of 1/4, 3/4 towards 0, 1/2, 1.
-*)
-(*RescaleAngles[x_]=Which[x<=1/4,x^2+3/4x,1/4<x<=1/2,-x^2+7/4x-1/8,1/2<x<=3/4,3/8-x/4+x^2,3/4<x,-(3/4)+(11 x)/4-x^2];
-Plot[{x,RescaleAngles[x]},{x,0,1}]*)
+ToNumber[yyy_List]:=ToNumber/@yyy;
+
+ToNumber[x_String]:=If[StringMatchQ[x,NumberString],ToExpression[x],If[StringMatchQ[x,NumberString~~("e"|"E")~~NumberString],(#[[1]] 10^#[[2]])&@(ToExpression/@StringSplit[x,("e"|"E")]),x]];
+
+ToNumber[x_]:=x;
+
+
+LoadVCF[inputfile_String,OptionsPattern[{NumberOfLines->100000,Columns->All,PrintReports->False}]]:=Module[{stream,rd,ps,nnn,clmn,types,limit,cnt,fff,res,header,scorepos,scorepos1,ll},
+
+nnn=OptionValue[NumberOfLines];
+clmn=OptionValue[Columns];
+
+rd=ReadList[inputfile,String,1000];
+
+If[rd==={},Return[{}]];
+
+ps=Join@@Position[rd,x_/;StringMatchQ[x,"#*"],{1},Heads->False]//Max;
+stream=OpenRead[inputfile];
+If[ps=!=-\[Infinity],
+Skip[stream,String,ps-1];
+header=(StringSplit[#,"\t",All]&/@ReadList[stream,String,1])[[1]];
+ll=Length[header],
+
+header="no vcf file header";
+ll=StringSplit[rd[[1]],"\t",All]//Length];
+
+types=Join[{"Word","Number","Word","Word","Word",(*"Number"*)"Word"},Table["Word",{ll-6}]];
+
+If[Head[types[[clmn]]]===Part,Print[Style["Column information is wrong!\nShould be between 1 and "<>ToString[ll]<>"!",Red,Bold]];Return["Wrong columns"]];
+limit=10^10/nnn//Round;
+cnt=0;
+
+Do[
+rd=ReadList[stream,types,nnn,NullWords->True,WordSeparators->{"\t"}];
+If[rd==={},Break[]];
+cnt++;
+fff[cnt]=rd[[All,clmn]]
+,{limit}];
+Close[stream];
+res=Join@@Array[fff,cnt];
+If[OptionValue[PrintReports],Print["Loaded ",Length[res]," lines into ",Dimensions[res]," table."]];
+LastVCFHeader=If[ps===-\[Infinity],header,header[[clmn]]];
+scorepos=Join@@Position[Range[ll][[clmn]],6];
+If[scorepos==={},
+res,
+(scorepos1=scorepos[[1]];
+ReplacePart[#,scorepos1->ToNumber[#[[scorepos1]]]]&/@res)]
+];
 
 
 (*
-Input: list of pairs of numbers (read counts).
-Output - 4 lists of positions for 4 clusters:
-{0/0, 0/1, 1/1, the number of reads is less than MinimalCoverage}
+-Log10 with excluded singularity at 0.
 *)
+Log0[x_,\[Epsilon]_:0.01]:=If[x<\[Epsilon],-Log10[\[Epsilon]],-Log10[x]]
 
-Options[Genotype2D]={MinimalCoverage->6};
-Genotype2D[readcounts_?MatrixQ,OptionsPattern[Genotype2D]]:=
-Module[{mnrd,n,l,ttl,psok,psinsufficientreads,deltas,angles,anglesplus,ord,extra,mdl,anglessorted,g0,g12,clusters,nonemptyclusters,clusteredangles,clustereddeltas,clustersplitprobe,newcluster,clusterdist,clustertosplit,splt},
-(*SpreadFactor=1./3;*)
+
+(*
+Order of vectors is important!
+AlleleVectors[2]={{1.,0.},{0.5,0.5},{0.,1.}};
+AlleleVectors[3]={{1.,0.,0.},{0.5,0.5,0.},{0.,1.,0.},{0.5,0.,0.5},{0.,0.5,0.5},{0.,0.,1.}};
+*)
+AlleleVectors[n_]:=AlleleVectors[n]=Join@@Table[1./2 (IdentityMatrix[n][[j1]]+IdentityMatrix[n][[j2]]),{j1,1,n},{j2,1,j1}];
+NormalizedAlleleVectors[n_]:=NormalizedAlleleVectors[n]=#/Norm[#]&/@AlleleVectors[n];
+
+AlleleCombinations[n_]:=AlleleCombinations[n]=Prepend[Join@@Table[{j2,j1},{j1,1,n},{j2,1,j1}],{0,0}];
+
+
+(*
+This function takes a set of vectors and assigns each to the closest allele vector, also substituting the closest allele vector by this vector.
+Output: {final substituted list of allele vectors, positions of original vectors in the final list}
+*)
+ClosestVectors[vect_?MatrixQ]:=Module[{d,products,vectororder,productorder,finallist,takenlist,reorderlist},
+d=Length[vect[[1]]];
+If[Length[vect]>Length[AlleleVectors[d]],Return["Too many vectors!"]];
+products=(vect/Norm/@vect).Transpose[NormalizedAlleleVectors[d]];
+vectororder=Reverse[Ordering[Max/@products]];
+productorder=Reverse/@(Ordering/@products[[vectororder]]);
+finallist=AlleleVectors[d];
+reorderlist=ConstantArray[0,Length[vect]];
+takenlist={};
+Do[
+Do[If[FreeQ[takenlist,productorder[[j,i]]],
+(AppendTo[takenlist,productorder[[j,i]]];
+finallist[[productorder[[j,i]]]]=vect[[vectororder[[j]]]];
+reorderlist[[vectororder[[j]]]]=productorder[[j,i]];
+(*Print[takenlist,"\t",finallist];*)
+Break[])
+]
+,{i,1,Length[productorder[[j]]]}]
+,{j,1,Length[vectororder]}];
+{finallist,reorderlist}
+]
+
+
+(*
+Function BinomialBestFit clusters l-dimensional vectors based on Multinomial probability. 
+Input: a matrix of readcounts (n x l) for n individuals, l alleles.
+Output: {n-list of numbers from 1 to k for best clusters,
+directions (probabilities) of the best clusters (k x l)}.
+Options: 
+MinimalProbability should be greater than 0 to avoid Log[0]. Default MinimalProbability 0.01 is a reasonable value.
+InitialProbabilities is an important option, defines the directions for intitial clusters. The default ones are given by AlleleVectors[l].
+GenotypingCoverage: if an individual has less than this number of reads covering the site than the genotype is not calculated and set to ./. The default value is 1, i.e. only individuals with no reads are not genotyped.
+*)
+Options[BinomialBestFit]={MinimalProbability->0.01,InitialProbabilities->"Default",
+GenotypingCoverage->1,
+PrintReports->False};
+
+BinomialBestFit[readcounts0_?MatrixQ,OptionsPattern[BinomialBestFit]]:=Module[{l,p,pinit,plog,\[Epsilon],phred,bestcluster0,bestcluster,ttl,ps0,readcounts,psinsert},
+\[Epsilon]=OptionValue[MinimalProbability];
+pinit=OptionValue[InitialProbabilities];
+
+l=Length[First[readcounts0]];
+ttl=Plus@@#&/@readcounts0;
+ps0=Position[Sign[ttl-OptionValue[GenotypingCoverage]],-1,{1},Heads->False];
+readcounts=Delete[readcounts0,ps0];
+psinsert=ps0-Range[0,Length[ps0]-1];
+
+p=If[pinit==="Default",AlleleVectors[l],pinit];
+bestcluster0=0;
+Do[plog=Map[Log0[#,\[Epsilon]]&,p,{2}]//Transpose;
+phred=readcounts.plog;
+bestcluster=(Ordering[#,1]&/@phred)[[All,1]];
+If[bestcluster0===bestcluster,Break[]];
+p=N[#/Plus@@#]&/@Total[GatherBy[{readcounts,bestcluster}//Transpose,Last][[All,All,1]],{2}]//Sort;
+If[OptionValue[PrintReports]===True,Print[p]];
+bestcluster0=bestcluster,
+{Length[readcounts]}];
+{Insert[bestcluster,0,psinsert],p}
+];
+
+
+(*
+Split2D splits biallelic read counts to 4 groups using the maximal spread angle. The forth group is the individuals with low (less than MinimalCoverage) read counts.
+Input: (n x 2) matrix of read counts.
+Output: {4 lists of positions of individuals in the 4 clusters}, the lists may be empty.
+*)
+Options[Split2D]={MinimalCoverage->6};
+Split2D[readcounts_?MatrixQ,OptionsPattern[Split2D]]:=
+Module[{mnrd,n,l,ttl,psok,psinsufficientreads,angles,anglesplus,ord,extra,mdl,anglessorted,g0,g12,clusters},
+
 mnrd=OptionValue[MinimalCoverage];
 n=Length[readcounts];
-ttl=Norm/@N[readcounts]
+ttl=Total[readcounts,{2}];
 (*ttl=readcounts[[All,1]]+readcounts[[All,2]]*)(*Plus@@#&/@readcounts*);
 
-psok=Join@@Position[Sign[ttl-mnrd+0.0000001],1,{1},Heads->False];
+psok=Join@@Position[Sign[ttl-(mnrd-1)],1,{1},Heads->False];
 l=Length[psok];
-If[l===0,Return[{{{},{},{},Range[n]},0}]];
+If[l===0,Return[{{},{},{},Range[n]}]];
 
 psinsufficientreads=Complement[Range[n],psok];
-
-
-(*deltas=SpreadFactor/Sqrt[ttl[[psok]]//N];*)
 
 angles=2./\[Pi] (ArcSin[N[readcounts[[psok,2]]]/Norm/@N[readcounts[[psok]]]]);
 
@@ -284,54 +427,106 @@ anglessorted=anglesplus[[ord]];
 g0=Ordering[Differences[anglessorted[[1;;mdl]]],-1][[1]];
 g12=Ordering[Differences[anglessorted[[mdl;;-1]]],-1][[1]]+mdl-1;
 clusters={ord[[2;;g0]],DeleteCases[ord[[g0+1;;g12]],x_/;x>l],ord[[g12+1;;-2]]};
-nonemptyclusters=Join@@Position[clusters,x_/;x=!={},{1},Heads->False];
 
-clusteredangles=angles[[#]]&/@clusters[[nonemptyclusters]];(*clustereddeltas=deltas[[#]]&/@clusters[[nonemptyclusters]];*)
+Append[psok[[#]]&/@clusters,psinsufficientreads]
+];
 
-(*If[Length[nonemptyclusters]==2,
-clustersplitprobe=Table[SplitCluster[clusteredangles[[j]],clustereddeltas[[j]]],{j,1,2}];
-If[Max[clustersplitprobe[[All,1]]]>200,clustertosplit=Ordering[clustersplitprobe[[All,1]],-1][[1]];
-splt=clustersplitprobe[[clustertosplit,2]];
-newcluster={#[[1;;splt]],#[[splt+1;;-1]]}&@clusters[[nonemptyclusters[[clustertosplit]]]];
-clusters=ReplacePart[clusters[[nonemptyclusters]],clustertosplit\[Rule]Sequence@@newcluster];
-nonemptyclusters={1,2,3}
-]
-];*)
 
-(*If[Length[nonemptyclusters]\[Equal]1,
-clustersplitprobe=SplitCluster[clusteredangles[[1]],clustereddeltas[[1]]];
-If[clustersplitprobe[[1]]>200,
-splt=clustersplitprobe[[2]];
-newcluster={#[[1;;splt]],#[[splt+1;;-1]]}&@clusters[[nonemptyclusters[[1]]]];
+(*
+Split10D splits multiallelic read counts using Split2D on each allele count against the some of the rest allele counts.
+Input: (n x d) matrix of allele count vectors.
+Output: (n x 2) matrix representing initial genotypes, each in the form {j1,j2}, where for example {1,2} corresponds to '0/1'. 
+{0,0} stands for low coverage individuals.
+*)
+Split10D[readcounts_?MatrixQ,optns:OptionsPattern[Split2D]]:=
+Module[{mnrd,ll,trans,ttl,clusters,allelestoremove,allelestoremain,genotypesremaining,al,genotypes,ps0,genotypes0},
 
-Switch[nonemptyclusters,
-{1},clusters=Append[newcluster,{}];nonemptyclusters={1,2},
-{3},clusters=Prepend[newcluster,{}];nonemptyclusters={2,3},
-{2},If[Mean[Mean[angles[[#]]]&/@newcluster]>0.5,(clusters=Prepend[newcluster,{}];nonemptyclusters={2,3}),
-(clusters=Append[newcluster,{}];nonemptyclusters={1,2})]
-]
-]
-];*)
+mnrd=OptionValue[MinimalCoverage];
+ll=Dimensions[readcounts];
 
-If[Length[nonemptyclusters]<=1,
-clusterdist=(*{{0,0}}*)0,
-(*clusterdist=ClusterDistance[angles[[#]]&/@clusters[[nonemptyclusters]],deltas[[#]]&/@clusters[[nonemptyclusters]]*)
-clusterdist=Min[clusteredangles[[2;;-1,1]]-clusteredangles[[1;;-2,-1]]]
+trans=Transpose[readcounts];
+ttl=Total[trans];
+
+(*
+First cluster using Split2D - each allele vs the total of read counts for all other alleles
+*)
+clusters=Table[Split2D[Transpose[{ttl-rrr,rrr}],optns],{rrr,trans}];
+
+(*
+Find alleles to be removed - those that don't have multiple clusters
+*)
+allelestoremove=Join@@Position[RemoveAlleleQ/@clusters,True,{1},Heads->False];
+
+(*
+If all but one allele is to be removed, leave at least 2 alleles - those that have maximal number of reads across all samples
+*)
+If[Length[allelestoremove]>ll[[2]]-2,allelestoremove=Complement[allelestoremove,Ordering[Total/@trans,-2]]];
+
+allelestoremain=Complement[Range[ll[[2]]],allelestoremove];
+
+(*Print[allelestoremove];*)
+
+(*
+If there are alleles to be removed, then run the same function only on those remaining,
+and then correct the allele numbers in the genotypes
+*)
+If[allelestoremove=!={},
+
+genotypesremaining=Split10D[readcounts[[All,allelestoremain]],optns];
+Return[If[#==={0,0},{0,0},allelestoremain[[#]]]&/@genotypesremaining]
 ];
 
 (*
-If there are only two clusters and the clusters are too close then the two clusters are merged together.
+Collect the alleles from all clusters for each sample
 *)
-(*If[And[Length[nonemptyclusters]===2,
-Or[clusterdist[[1,1]]<0.15,
-clusterdist[[1,2]]<200]],
-clusters=If[FreeQ[nonemptyclusters,1],{{},{},Flatten[clusters]},{Flatten[clusters],{},{}}]];*)
+al={{},{1},{1,1},{}};
 
-(*Show[PlotClusteredReadCounts2D[readcounts[[#]]&/@Append[psok[[#]]&/@clusters,psinsufficientreads]],PlotLabel\[Rule]Round[clusterdist,0.1]]//Print;*)
-{(*readcounts[[#]]&/@*)
-Append[psok[[#]]&/@clusters,psinsufficientreads],(*Min[clusterdist[[All,2]]]*)clusterdist(1- Length[psinsufficientreads]/n)
-(*,
-MinMeanMax/@(angles[[#]]&/@clusters)*)}
+genotypes=
+(Join@@#&/@(Table[ConvertClusterPositionsToGenotypes[clusters[[i]],al*allelestoremain[[i]]],{i,1,Length[allelestoremain]}]//Transpose));
+
+ps0=Position[Sign[ttl-mnrd],-1,{1},Heads->False];
+
+genotypes0=ReplacePart[genotypes,ps0->{0,0}];
+
+(*
+Some samples may get less than 2 or more than 2 alleles.
+Those should be resolved - reduced to exactly 2 alleles.
+*)
+ResolveWrongGenotypes[genotypes0,readcounts]
+];
+
+
+(*
+Input: the result of Split2D, i.e. 4 lists of positions.
+If there is only one nonempty cluster and it is the 0/0 one than the function returns True, i.e. the second allele should be removed.
+If the only cluster is 1/1 or there is more than one cluster, then the function returns False, i.e. no alleles should be removed.
+*)
+RemoveAlleleQ[genotype2Dclusters_List]:=Module[{nonempty},
+nonempty=Join@@Position[genotype2Dclusters[[1;;3]],List[__],Heads->False];
+(*Or[nonempty==={1},nonempty==={2}]*)
+nonempty==={1}
+]
+
+
+(*
+InitialSplit uses the split genotyping method to cluster read counts and returns a list of normalized vector probabilities for the cluster directions.
+*)
+InitialSplit[readcounts_,optns:OptionsPattern[Split2D]]:=Module[{d,grp0},
+d=Length[readcounts[[1]]];
+
+(* Biallelic case *)
+
+If[d===2,
+(
+grp0=DeleteCases[Split2D[readcounts,optns][[1;;3]],{},{1}];
+Return[N[#/Plus@@#]&/@((Total[Part[readcounts,#],{1}])&/@grp0)]
+)
+];
+
+(* Multiallelic case *)
+
+grp0=GatherBy[DeleteCases[Transpose[{Split10D[readcounts,optns],Range[Length[readcounts]]}],{{0,0},_},{1}],First][[All,All,2]];
+N[#/Plus@@#]&/@Table[Total[Part[readcounts,rrr],{1}],{rrr,grp0}]
 ]
 
 
@@ -388,14 +583,14 @@ PlotClusteredReadCounts2D[Append[readsbygenotype,reads2D[[ps0]]]]
 ];
 
 
-Options[Genotype2DPlot]={};Genotype2DPlot[readcounts_List,op:OptionsPattern[{Genotype2DPlot,Genotype2D}]]:=Module[{clst},
-clst=Genotype2D[readcounts,FilterRules[{op},Options[Genotype2D]]];
-PlotClusteredReadCounts2D[readcounts[[#]]&/@(clst[[1]])]
+Options[Split2DPlot]={};Split2DPlot[readcounts_List,op:OptionsPattern[{Split2DPlot,Split2D}]]:=Module[{clst},
+clst=Split2D[readcounts,FilterRules[{op},Options[Split2D]]];
+PlotClusteredReadCounts2D[readcounts[[#]]&/@(clst)]
 ]
 
 
 (*
-Converts the list of clustered positions clusterpositions as in output of Genotype2D to a list of alleles based on genotypesofclusters
+Converts the list of clustered positions clusterpositions as in output of Split2D to a list of alleles based on genotypesofclusters
 *)
 ConvertClusterPositionsToGenotypes[clusterpositions_List,genotypesofclusters_List]:=Module[{ord,clusterlengths},
 ord=Ordering[Flatten[clusterpositions]];
@@ -405,96 +600,59 @@ clusterlengths=Length/@clusterpositions;
 
 
 (*
-Input - a table of read counts. Output -{a list of resolved alleles, clustering score}
-*)
-Options[GenotypeReadCounts]={ShowFootprints->False};
-GenotypeReadCounts[readcounts_?MatrixQ,optns:OptionsPattern[{Genotype2D,GenotypeReadCounts}]]:=Module[{mnrd,ll,trans,ttl,clusters,allelestoremove,allelestoremain,li,ord,al,al2,genotypes,ps0,genotypes0,genotypesremaining},
+Input: a table of read counts, matrix (n x l).
 
-mnrd=OptionValue[MinimalCoverage];
+Output: {a list of resolved alleles for each individual in the form {1,2} - matrix of integers (n x 2), 
+a list of probability vectors for each cluster including empty clusters - matrix (l(l+1)/2 x l),
+a list of phred probabilities for each individual - matrix (n x l(l+1)/2) with phred=0 for the allele called }
+
+UseInitialSplit\[Rule]True tells the function to use the gap splitting first, and then to refine using statistical methods.
+UseInitialSplit\[Rule]False tells the function to use the default initial probabilities {1,0}, {1/2,1/2}, {0,1}.
+*)
+Options[GenotypeReadCounts]={UseInitialSplit->True};
+GenotypeReadCounts[readcounts_?MatrixQ,optns:OptionsPattern[{BinomialBestFit,GenotypeReadCounts,Split2D}]]:=Module[{ll,bbf,genotypes,init0,\[Epsilon],closest,clustn,p,plog,phred,scores},
+
 ll=Dimensions[readcounts];
+\[Epsilon]=OptionValue[MinimalProbability];
 
 (*
 If there is only one allele then the genotypes are trivial
 *)
-If[ll[[2]]===1,Return[{Table[{1,1},{ll[[1]]}],0}]];
+If[ll[[2]]===1,Return[{ConstantArray[{1,1},ll[[1]]],{{1}},ConstantArray[{0},ll[[1]]]}]];
 
 (*
-If there are 2 alleles then the genotypes are obtained easily using 
-clustering by Genotype2D and then converting to genotypes
+First split individuals to groups using nonstatistical split methods unless the option UseInitialSplit is set to False
 *)
-If[ll[[2]]===2,
-(
-al2={{1,1},{1,2},{2,2},{0,0}};
-clusters=Genotype2D[readcounts,FilterRules[{optns},Options[Genotype2D]]];
-genotypes0=ConvertClusterPositionsToGenotypes[clusters[[1]],al2];
-Return[{genotypes0,clusters[[2]]}]
-)];
-
-(*
-If there are more than 2 alleles then the process is more complicated
-*)
-
-trans=Transpose[readcounts];
-ttl=Total[trans];
-
-(*
-First cluster using Genotype2D - each allele vs the total of read counts for all other alleles
-*)
-clusters=Genotype2D[Transpose[{ttl-#,#}],FilterRules[{optns},Options[Genotype2D]]]&/@trans;
-
-(*{clusters,clusteredcounts2d}=Transpose[Block[{counts2d,clst},
-Table[counts2d=Transpose[{ttl-rrr,rrr}];clst=Genotype2DNew[counts2d,MinimalCoverage->mnrd];
-{clst,counts2d[[#]]&/@clst[[1]]},{rrr,trans}]]];*)
-
-If[OptionValue[ShowFootprints],Do[Show[PlotClusteredReadCounts2D[Transpose[{ttl-trans[[j]],trans[[j]]}][[#]]&/@clusters[[j,1]]],PlotLabel->"allele"<>ToString[j]<>",score:"<>ToString[Round[1000clusters[[j,2]]]]]//Print,{j,1,Length[clusters]}]];
-
-(*
-Find alleles to be removed - those that don't have multiple clusters
-*)
-allelestoremove=Join@@Position[clusters,x_/;RemoveAlleleQ[x[[1]]],{1},Heads->False];
-
-(*
-If all but one allele is to be removed, leave at least 2 alleles - those that have maximal number of reads across all samples
-*)
-If[Length[allelestoremove]>ll[[2]]-2,allelestoremove=Complement[allelestoremove,Ordering[Total/@trans,-2]]];
-
-allelestoremain=Complement[Range[ll[[2]]],allelestoremove];
-
-(*
-If there are alleles to be removed, then run the same function only on those remaining,
-and then correct the allele numbers in the genotypes
-*)
-If[allelestoremove=!={},
-
-genotypesremaining=GenotypeReadCounts[readcounts[[All,allelestoremain]],FilterRules[{optns},Options/@{Genotype2D,GenotypeReadCounts}]];
-Return[{If[#==={0,0},{0,0},allelestoremain[[#]]]&/@genotypesremaining[[1]],genotypesremaining[[2]]}]
-
-(*trans=trans[[allelestoremain]];ttl=Total[trans];
-clusters=Genotype2D[Transpose[{ttl-#,#}],MinimalCoverage->mnrd]&/@trans;
-If[OptionValue[ShowFootprints],Print["============================"];
-Do[Show[PlotClusteredReadCounts2D[Transpose[{ttl-trans[[j]],trans[[j]]}][[#]]&/@clusters[[j,1]]],PlotLabel\[Rule]"allele"<>ToString[allelestoremain[[j]]]<>",score:"<>ToString[Round[1000clusters[[j,2]]]]]//Print,{j,1,Length[clusters]}]
-]*)
+If[OptionValue[UseInitialSplit],
+(init0=InitialSplit[readcounts,FilterRules[{optns},Options/@{Split2D}]];
+If[init0==={},init0="Default"]),
+init0="Default"
 ];
 
 (*
-Collect the alleles from all clusters for each sample
+Refine the clustering using multinomial likelihood based expectation-maximization algorithm
 *)
-al={{},{1},{1,1},{}};
-
-genotypes=
-(Join@@#&/@(Table[ConvertClusterPositionsToGenotypes[clusters[[i,1]],al*allelestoremain[[i]]],{i,1,Length[allelestoremain]}]//Transpose));
-
-(*Join@@#&/@(Table[allelestoremain[[i]](Join@@Table[al[[j]],{j,1,4},{li\[LeftDoubleBracket]i,j\[RightDoubleBracket]}])[[ord[[i]]]],{i,1,Length[allelestoremain]}]//Transpose);*)
-
-ps0=Position[Sign[ttl-mnrd],-1,{1},Heads->False];
-
-genotypes0=ReplacePart[genotypes,ps0->{0,0}];
+bbf=BinomialBestFit[readcounts,InitialProbabilities->init0,FilterRules[{optns},Options/@{BinomialBestFit}]];
 
 (*
-Some samples may get less than 2 or more than 2 alleles.
-Those should be resolved - reduced to exactly 2 alleles.
+Assign the genotypes to each cluster based on the closest allele vector
 *)
-{ResolveWrongGenotypes[genotypes0,readcounts],clusters[[All,2]]//Mean}
+closest=ClosestVectors[bbf[[2]]];
+clustn=Prepend[closest[[2]],0][[bbf[[1]]+1]];
+genotypes=AlleleCombinations[ll[[1]]][[clustn+1]];
+p=closest[[1]];
+
+(*
+Calculate phred scores
+*)
+plog=Map[Log0[#,\[Epsilon]]&,p,{2}]//Transpose;
+phred=readcounts.plog;
+scores=Round[10(phred-(Min/@phred))];
+
+(*
+Report {genotypes, probability vectors, phred scores}
+*)
+{genotypes,p,scores}
 ]
 
 
@@ -517,9 +675,6 @@ Union[Subsets[#,{2}]]&/@genotypes[[ps2]]
 newgenotypes=Table[
 ttt=Table[picked=Pick[readcounts,(#===sss)&/@genotypes];
 
-(*meanvector=If[picked==={},ReplacePart[Table[0,{k}],(List/@sss)\[Rule]1],picked//N//Mean];
-VectorAngle[readcounts[[ps[[j]]]]//N,meanvector]*)
-
 meanvector=If[picked==={},{ReplacePart[Table[0,{k}],(List/@sss)->1]},picked//N];
 Min[VectorAngle[readcounts[[ps[[j]]]]//N,#]&/@meanvector]
 
@@ -527,8 +682,6 @@ Min[VectorAngle[readcounts[[ps[[j]]]]//N,#]&/@meanvector]
 
 suspectedgenotypes[[j,Ordering[ttt,1][[1]]]]
 ,{j,1,ps//Length}];
-
-(*Transpose[{ps,readcounts[[ps]],genotypes[[ps]],newgenotypes}]//Print;*)
 
 ReplacePart[genotypes,(#[[1]]->#[[2]])&/@Transpose[{ps,newgenotypes}]]
 ]
@@ -549,7 +702,7 @@ ReorderAlleles[{coord_,vars_List,readcounts_List}]:=Prepend[ReorderAlleles[{vars
 
 
 (*
-Input: the result of Genotype2D, i.e. 4 lists of positions.
+Input: the result of Split2D, i.e. 4 lists of positions.
 If there is only one nonempty cluster and it is the first 0/0 or 0/1 one than the function returns True, i.e. the second allele should be removed.
 If the only cluster is 1/1 or there is more than one cluster, then the function returns False, i.e. no alleles should be removed.
 *)
@@ -561,7 +714,7 @@ Or[nonempty==={1},nonempty==={2}]
 
 VariantPlot[x_List]:=Module[{l,sbs},
 l=Length[x[[2]]];
-If[l===2,Return[Show[Genotype2DPlot[x[[3]]],PlotLabel->Style[MakeCoordinateString[x[[1]]]<>"\n"<>x[[2,1]]<>"\[Rule]"x[[2,2]],{Larger}],AxesLabel->(Style[#,{Bold,Larger}]&/@x[[2]])]]];
+If[l===2,Return[Show[Split2DPlot[x[[3]]],PlotLabel->Style[MakeCoordinateString[x[[1]]]<>"\n"<>x[[2,1]]<>"\[Rule]"x[[2,2]],{Larger}],AxesLabel->(Style[#,{Bold,Larger}]&/@x[[2]])]]];
 sbs=Subsets[Range[l],{2}];
 Show[VariantPlot[{x[[1]],x[[2,#]],x[[3,All,#]]}],PlotLabel->Style[MakeCoordinateString[x[[1]]]<>"\n"<>x[[2,1]]<>"\[Rule]"StringJoinWith[x[[2,2;;-1]],","],{Larger}]]&/@sbs
 ]
@@ -578,18 +731,29 @@ Uses GenotypeReadCounts function to assign genotypes.
 The function may reorder the alleles in the multiallelic case.
 Input: {a list of coordinates of the variant, a list of allele sequences with the reference allele being first, a matrix of read counts of dimension number of individuals x number of alleles}.
 Output: a list of strings ready to be written into the vcf table.
-Last modification: 16 June 2015.";
+Last modification: 10 June 2016.";
 Options[ConvertVariantToVcfLine]={};
-ConvertVariantToVcfLine[variant_List,optns:OptionsPattern[{Genotype2D,GenotypeReadCounts,ConvertVariantToVcfLine}]]:=Module[{l,afprecision,nalleles,multi,reord,gnt,allelesin,allelesout,alleleslist,an,afstring,ac,dp,smpl1,smpl2,smpl,ord,ordord,score,res},
+ConvertVariantToVcfLine[variant_List,optns:OptionsPattern[{GenotypeReadCounts,ConvertVariantToVcfLine,BinomialBestFit,Split2D}]]:=Module[{l,afprecision,nalleles,multi,reord,gnt,allelesin,allelesout,alleleslist,an,afstring,ac,dp,infofield,smpl1,smpl2,smpl2ttl,smpl3min,smpl3,smpl,ord,ordord,score,res},
 
+nalleles=Length[variant[[2]]];
+
+If[nalleles===1,Return[{variant[[1,1;;2]],".",
+variant[[2,1]],
+".",
+0,
+"NoAltAllele",
+"AN="<>ToString[2 Length[variant[[3]]]]<>";DP="<>ToString[Plus@@variant[[3,All,1]]],
+"GT:AD:DP:GQ:PL",
+Table["0/0:"<>rrr<>":"<>rrr<>":0:0",{rrr,ToString/@variant[[3,All,1]]}]}//Flatten]];
+
+multi=nalleles>2;
+
+(* Twice the number of individuals *)
 l=2Length[variant[[3]]];
 afprecision=Ceiling[Log10[N[l]]]+1;
 
-nalleles=Length[variant[[2]]];
-multi=nalleles>2;
-
 reord=If[multi,ReorderAlleles[variant],variant];
-gnt=GenotypeReadCounts[reord[[3]],FilterRules[{optns},Options/@{Genotype2D,GenotypeReadCounts}]];
+gnt=GenotypeReadCounts[reord[[3]],FilterRules[{optns},Options/@{BinomialBestFit,GenotypeReadCounts,Split2D}]];
 allelesin=DeleteCases[Union@@(gnt[[1]]),0];
 allelesout=Complement[Range[nalleles],allelesin];
 
@@ -601,34 +765,20 @@ If[ord=!=Range[nalleles],
 (
 reord[[2]]=reord[[2,ord]];
 reord[[3]]=reord[[3,All,ord]];
-gnt=GenotypeReadCounts[reord[[3]],FilterRules[{optns},Options/@{Genotype2D,GenotypeReadCounts}]];
+gnt=GenotypeReadCounts[reord[[3]],FilterRules[{optns},Options/@{Split2D,GenotypeReadCounts}]];
 allelesin=ordord[[allelesin]];
 allelesout=ordord[[allelesout]]
 )];
 )
 ];
 
-(*If[allelesin==={1},Return[{reord[[1,1;;2]],".",reord[[2,1]],"-",0,"no_variant",Table["",{Length[variant[[3]]]+2}]}//Flatten]];*)
 alleleslist=DeleteCases[Flatten[gnt[[1]]],0];
-(*If[alleleslist==={},Return[{reord[[1,1;;2]],".",reord[[2,1]],
-StringJoinWithCommas[reord[[2,allelesin[[2;;-1]]]]],
-0,
-"not_enough_reads",Table["./.",{Length[variant[[3]]]+2}]}//Flatten]];*)
 an=Length[alleleslist];
 ac=ArrangeTallyList[(alleleslist//Tally),Range[2,nalleles]];
 If[an>0,afstring=StringJoin[Riffle[(If[#===0,"0",ToString[NumberForm[#/an//N,{afprecision,afprecision},ExponentFunction->(Null&)]]]&/@ac),","]],afstring=StringJoin[Riffle[ConstantArray["0",Length[ac]],","]]];
 dp=Total[reord[[3]],2];
 
-smpl1=GenotypeToString/@(gnt[[1]]-1);
-smpl2=(":"<>StringJoinWith[#,","])&/@reord[[3]];
-smpl=Inner[StringJoin,smpl1,smpl2,List];
-
-res={reord[[1,1;;2]],".",
-reord[[2,1]],
-StringJoinWith[reord[[2,2;;-1]],","],
-score=Round[1000gnt[[2]]],
-If[score>10,"PASS",If[an==0,"LowCoverage",If[allelesin==={1},"NoVariant","BadClustering"]]],
-StringJoin["AF=",
+infofield=StringJoin["AF=",
 afstring,
 ";AN=",
 ToString[an],
@@ -636,35 +786,66 @@ ToString[an],
 StringJoinWith[ac,","],
 ";DP=",
 ToString[dp],
-If[allelesout==={},"",";Fake_alleles="<>StringJoinWith[reord[[2,allelesout]],","]]],
-"GT:AD",
+If[allelesout==={},"",";DM="<>StringJoinWith[reord[[2,allelesout]],","]]];
+
+(*Genotypes*)
+smpl1=GenotypeToString/@(gnt[[1]]-1);
+(*Read counts*)
+smpl2=(StringJoinWith[#,","])&/@reord[[3]];
+(* Total read counts *)
+smpl2ttl=(ToString)/@Total[reord[[3]],{2}];
+(*Minimal phred score*)
+smpl3min=(RankedMin[#,2])&/@gnt[[3]];
+(*Phred scores*)
+smpl3=(StringJoinWith[#,","])&/@gnt[[3]];
+(*Final list for vcf file*)
+smpl=StringJoinWith[#,":"]&/@Transpose[{smpl1,smpl2,smpl2ttl,ToString/@smpl3min,smpl3}];
+score=Mean[smpl3min//N]//Round;
+
+res={reord[[1,1;;2]],".",
+reord[[2,1]],
+StringJoinWith[reord[[2,2;;-1]],","],
+score,
+".",
+infofield,
+"GT:AD:DP:GQ:PL",
 smpl}//Flatten;
 
-Remove[l,afprecision,nalleles,multi,reord,gnt,allelesin,allelesout,alleleslist,an,afstring,ac,dp,smpl1,smpl2,smpl,ord,ordord,score];
+Remove[l,afprecision,nalleles,multi,reord,gnt,allelesin,allelesout,alleleslist,an,afstring,ac,dp,infofield,smpl1,smpl2,smpl2ttl,smpl3min,smpl3,smpl,ord,ordord,score];
 
 res
-]
+];
 
 
 ConvertVcfLineToVariant[rrr_List]:={rrr[[1;;2]],Prepend[StringSplit[rrr[[5]],","],rrr[[4]]],AlleleCounts[rrr[[10;;-1]]]};
 
 AlleleCounts["./."]:={0,0};
 AlleleCounts[x_String]:=ToExpression/@StringSplit[StringSplit[x,":"][[2]],","];
-AlleleCounts[xx_List]:=Map[ToExpression,StringSplit[StringSplit[xx,":"][[All,2]],","],{2}];
+AlleleCounts[xx_List]:=Map[FromDigits,StringSplit[StringSplit[xx,":"][[All,2]],","],{2}];
 
 
-Options[RemoveFakeAlleles]={};
-RemoveFakeAlleles[vcfline_List,optns:OptionsPattern[{Genotype2D,GenotypeReadCounts,ConvertVariantToVcfLine,RemoveFakeAlleles}]]:=Module[{fake,variantalleles,removepositions,var,newalleles,newallelesreduced,newvcfline},
-If[StringFreeQ[vcfline[[8]],"Fake",IgnoreCase->True],Return[vcfline]];
-fake=StringSplit[StringCases[vcfline[[8]],Shortest["Fake"~~__~~"="]~~yyy__~~(";"|EndOfString)->yyy][[1]],","];
+Options[RemoveDummyAlleles]={};
+RemoveDummyAlleles[vcfline_List,optns:OptionsPattern[{Split2D,GenotypeReadCounts,ConvertVariantToVcfLine,RemoveDummyAlleles}]]:=Module[{fake,variantalleles,removepositions,var,newalleles,newallelesreduced,newvcfline,ac},
+If[StringFreeQ[vcfline[[8]],";DM=",IgnoreCase->True],Return[vcfline]];
+fake=StringSplit[StringCases[vcfline[[8]],Shortest["DM="~~yyy__~~(";"|EndOfString)]->yyy][[1]],","];
+
+(* If the only dummy allele is the reference one then leave it as it is *)
+If[fake==={vcfline[[4]]},Return[vcfline]];
+
 variantalleles=StringSplit[vcfline[[5]],","];
 removepositions=IntersectionPositionsSimple[variantalleles,fake][[All,1]];
 newalleles=Prepend[Delete[variantalleles,List/@removepositions],vcfline[[4]]];
 newallelesreduced=ReduceVariants[newalleles];
 
-var={{vcfline[[1]],vcfline[[2]]+newallelesreduced[[2,1]],vcfline[[2]]+StringLength[newallelesreduced[[1,1]]]-1},newallelesreduced[[1]],Delete[#,List/@(removepositions+1)]&/@(AlleleCounts/@vcfline[[10;;-1]])};
-newvcfline=ConvertVariantToVcfLine[var,FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Genotype2D,GenotypeReadCounts}]];
-If[fake==={vcfline[[4]]},newvcfline,RemoveFakeAlleles[newvcfline,FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Genotype2D,GenotypeReadCounts,RemoveFakeAlleles}]]]
+ac=AlleleCounts[vcfline[[10;;-1]]];
+
+(* Exclude the dummy alleles from the variant *)
+var={{vcfline[[1]],vcfline[[2]]+newallelesreduced[[2,1]],vcfline[[2]]+StringLength[newallelesreduced[[1,1]]]-1},newallelesreduced[[1]],Delete[#,List/@(removepositions+1)]&/@ac};
+newvcfline=ConvertVariantToVcfLine[var,FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Split2D,GenotypeReadCounts}]];
+
+(* Now do it again *)
+
+RemoveDummyAlleles[newvcfline,FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Split2D,GenotypeReadCounts,RemoveDummyAlleles}]]
 ];
 
 
@@ -696,8 +877,6 @@ ref=StringTake[reference,{Max[startcoordinate+maxchecks[[1]],1],Min[startcoordin
 If[StringCount[ref,prim,Overlaps->True]===1,
 uniq=True;Break[]],
 {j,pr,Min[l+1-startcoordinate,distancetonextvar]}];
-
-(*If[!uniq,PrintError["Warning: DesignRightPrimer:\nRight primer may be not unique!\n"<>StringTable[{{"reference:",StringJoin[Riffle[StringTake[reference,{{1,startcoordinate-1},{startcoordinate,-1}}],"|"]]},{"primer:",prim},{"primer start:",startcoordinate},{"bases to next variant:",distancetonextvar},{"primer size to start with:",pr},{"bases to check on the sides:",StringJoinWithCommas[maxchecks]}}]]];*)
 
 prim
 ];
@@ -733,7 +912,6 @@ If[Max[StringCount[checkseq,primers,Overlaps->True]]===1,
 uniq=True;Break[]]
 ,{pr,startpr,l}];
 
-(*If[!uniq,PrintError["Warning: DesignLeftPrimer:\nLeft primer may be not unique!\n"<>StringTable[{{"reference:",StringJoin[Riffle[StringTake[reference,{{1,startcoordinate},{startcoordinate+1,-1}}],"|"]]},{"primers:",primers//StringJoinWithCommas},{"primer start:",startcoordinate},{"primer size to start with:",startpr}}]]];*)
 primers
 ]
 
@@ -876,12 +1054,7 @@ If[needtoextendprimers[[2]],
 If[primerlengths[[2]]<basesavailableontheright,primerlengths+={0,1},error="Right primer cannot be prolonged";Break[]]])
 ];
 
-(*If[!(And@@StringFreeQ[multiplecases,{"No","Left"~~___~~"Right"}]),primerlengths+={1,1},
-(If[Or@@StringFreeQ[multiplecases,"Left"],
-primerlengths+={1,0}];
-If[Or@@StringFreeQ[multiplecases,"Right"],
-If[primerlengths[[2]]<basesavailableontheright,primerlengths+={0,1},error="Right primer cannot be prolonged";Break[]]])
-];*)
+
 newprimers={DesignLeftPrimer[Sequence@@leftprimerinput,LeftPrimerLength->primerlengths[[1]]],DesignRightPrimer[Sequence@@rightprimerinput,RightPrimerLength->primerlengths[[2]]]};
 If[newprimers==={leftprimer,rightprimer},error="New primers identical to old";Break[]];
 {leftprimer,rightprimer}=newprimers;
@@ -947,21 +1120,6 @@ left++;res=StringDrop[res,1],{l}];
 {res,{left,right}}
 ];
 
-(*ReduceVariants[x_List]:=Module[{res,left,right},
-res=x;
-left=0;
-right=0;
-While[Min[StringLength/@res]>1,
-If[SameQ@@(StringTake[#,-1]&/@res),
-right++;res=StringDrop[#,-1]&/@res,
-Break[]]];
-While[Min[StringLength/@res]>1,
-If[SameQ@@(StringTake[#,1]&/@res),
-left++;res=StringDrop[#,1]&/@res,
-Break[]]];
-{res,{left,right}}
-]*)
-
 
 (*
 The input: sortedintegerlist is a sorted list of integers, repeats are allowed.
@@ -974,14 +1132,6 @@ BoundaryPositionsSimple is a simple straightforward function (changed on 2015feb
 BoundaryPositions uses a trick to make it run faster, especially when y1 and y2 are quite close to each other.
 *)
 BoundaryPositionsSimple[sortedintegerlist_List,y_List]:=Ordering[Ordering[Join[{y[[1]]},sortedintegerlist,{y[[2]]}]]][[{1,-1}]]-{0,2};
-(*BoundaryPositionsSimple[sortedintegerlist_List,y_List]:=Module[{l,ps1,ps2},
-l=Length[sortedintegerlist];
-If[l===0,Return[{0,-1}]];
-If[Or[sortedintegerlist[[1]]>y[[2]],sortedintegerlist[[-1]]<y[[1]]],Return[{1,0}]];
-ps1=Position[sortedintegerlist,xxx_/;xxx\[GreaterEqual]y[[1]],{1},1][[1,1]];
-ps2=Position[sortedintegerlist//Reverse,xxx_/;xxx\[LessEqual]y[[2]],{1},1][[1,1]];
-{ps1,l-ps2+1}
-];*)
 
 BoundaryPositions[sortedintegerlist_List,y_List,step_Integer:0]:=Module[{l,indxpos,indx,ps,pos,st},
 l=Length[sortedintegerlist];
@@ -1088,7 +1238,6 @@ reslength=Length[res];
 
 Catch[
 If[previousvars==={},varj=suspectedvariants[[j]],varj=CombineTwoRegionsWithCounts[{previousvars,suspectedvariants[[j]]}](*;Print["--->",j,"\t",varj]*)];
-(*seqj=Table[cas[[Range@@BoundaryPositions[cas[[All,2]],{varj[[1,2]]-readlength,varj[[1,1]]}],1]],{cas,seqcoord}];*)
 
 (*Print[varj,"\t",*)
 countsj=CountReadCasesTop[{{chr,varj[[1]]},varj[[2]]},seqcoord,{#[[1,2;;3]],#[[2]]}&/@If[reslength>5,res[[-5;;-1]],res],If[j===l,-1,suspectedvariants[[j+1,1,1]]],FilterRules[{optns},Options[GetSequenceFromGenomeFasta]]];(*//AbsoluteTiming];*)
@@ -1108,7 +1257,7 @@ Throw[0]
 ];
 (*Print[If[StringQ[countsj],countsj,countsj[[1;;2]]]]*)
 ,{j,1,l}];
-)(*//AbsoluteTiming];*)
+)
 
 If[logs=!=False,WriteString[logs,DateString[],"\tFinished evaluation of variant sites.\t",NumberForm[-DateDifference[tm,"Second"][[1]],{10,1},ExponentFunction->(Null&)]," seconds.\n"]];
 
@@ -1141,7 +1290,7 @@ logs=OptionValue[LogStream];
 If[logs=!=False,WriteString[logs,tm=DateString[],"\tStarted the initial variant scan.\n"]];
 
 Switch[OptionValue[SaveCoverage],
-True,savecoverage=True;coveragefile=TidyVarTmpDirectory<>"coverage.txt",
+True,savecoverage=True;coveragefile=FileNameJoin[{TidyVarTmpDirectory,"coverage.txt"}],
 False,savecoverage=False,
 _String,savecoverage=True;coveragefile=OptionValue[SaveCoverage],
 _,PrintError["Wrong value of Option SaveCoverage: "<>ToString[OptionValue[SaveCoverage]]];Abort[]];
@@ -1149,7 +1298,7 @@ _,PrintError["Wrong value of Option SaveCoverage: "<>ToString[OptionValue[SaveCo
 multiregioncalculation=And[ListQ[inputregion],MatrixQ[inputregion[[2]]]];
 
 If[multiregioncalculation,
-(regionbedfile=TidyVarTmpDirectory<>"region_temp_"<>FromCharacterCode[RandomInteger[{97,122},10]]<>".bed";
+(regionbedfile=FileNameJoin[{TidyVarTmpDirectory,"region_temp_"<>FromCharacterCode[RandomInteger[{97,122},10]]<>".bed"}];
 WriteString[regionbedfile,
 StringJoinWith[StringJoinWith[{inputregion[[1]],#+{-1,0}},"\t"]&/@inputregion[[2]],"\n"]
 ];
@@ -1188,25 +1337,15 @@ If[OptionValue[MinimalReadMappingScore]===0,"",{"-q",OptionValue[MinimalReadMapp
  "-r",(region//MakeCoordinateString),
 If[multiregioncalculation,{"-l",regionbedfile},""],
 flbam,
-"|",awkcmd(*cutcmd*)(*awkcmd*)(*remove?*)
+"|",awkcmd(*cutcmd*)
 ,If[savecoverage,teecmd,")"]}//StringJoinWith;
 
-(*WriteString["stdout",cmd,"\n"];
-Return[RunExternal[cmd,String]];*)
 
 types=Flatten[{Word,Number,Word,Table[{Number,Word},{l}]}];
 (*Return[RunExternal[cmd,String]];*)
 mpileup=RunExternal[cmd,types,WordSeparators->"\t",NullWords->True];
 (*mpileup//Dimensions)//AbsoluteTiming//Print;*)
 If[multiregioncalculation,DeleteFile[regionbedfile]];
-
-(*If[MatrixQ[inputregion[[2]]],
-selectpositions=BoundaryPositions[mpileup[[All,2]],#]&/@CombineRegions[inputregion[[2]]];
-mpileup=Join@@(Take[mpileup,#]&/@selectpositions)
-];*)
-
-
-(*WriteString[coveragestream,StringJoinWithLineBreaks[StringJoinWithTabs/@mpileup[[All,Join[{1,2},Range[4,Length[mpileup[[1]]],2]]]]],"\n"];*)
 
 (* The coverage columns are flattened to one long list *)
 coverage=Join@@mpileup[[All,4;;-1;;2]];
@@ -1316,12 +1455,6 @@ Label[again];
 (*First select sequences that start not too far on the left and not after coord1 to be able to bridge over the fragment*)
 chosenseqcoordcigar=Take[#,BoundaryPositions[#[[All,2]],{coord1-Round[1.5readlength],coord1}]]&/@seqcoordcigar;
 
-(*rm=ToString[readlength]<>"M";
-GetGenomicSpreadOfRead[rm]=readlength;
-GetGenomicSpreadOfRead[x_String]:=CigarLength[x];
-CountDeletionsInRead[rm]=0;
-CountDeletionsInRead[x_String]:=CigarDeletions[x];*)
-
 (*Calculate from cigar how many bases in the genome the read spands.
 GetGenomicSpreadOfRead is basically CigarLength but it remembers its values*)
 readspread=Map[GetGenomicSpreadOfRead,chosenseqcoordcigar[[All,All,3]],{2}];
@@ -1365,7 +1498,7 @@ targets is a list of regions in the form accepted by ScanForVariantCandidates.
 outputvcffile is the name of the file to save the variants in.
  Output: the total number of variants (lines in the VCF file) detected.";
 Options[CallVariants]={(*SampleLabels\[Rule]"FromFileNames"*)FailedLogFileName->Automatic,LogFileName->Automatic,OptimiseTargets->True};
-CallVariants[bamfiles_,outputvcffile_String,targets0_:"",region0_:"",optns:OptionsPattern[{LoadBedTargets,FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Genotype2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{flbam,samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,varcount,logfile,logstream,coveragefile,region,samtoolscheck,tm,tm0,targets,optimisedtargets,optnstoreport,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass},
+CallVariants[bamfiles_,outputvcffile_String,targets0_:"",region0_:"",optns:OptionsPattern[{LoadBedTargets,FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Split2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{flbam,samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,varcount,logfile,logstream,coveragefile,region,samtoolscheck,tm,tm0,targets,optimisedtargets,optnstoreport,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass,vcfmeta},
 
 optnstoreport={FastaFileName,ExtendTargetsBy,MinimalBaseSequencingScore,MinimalReadMappingScore,MinimalCoverage,SamtoolsFlagFilter,VariantThreshold,SaveCoverage,LogFileName,FailedLogFileName};
 
@@ -1429,8 +1562,9 @@ optimisedtargets=targets];
 
 WriteString[logstream,DateString[],"\tStarted to call variants in ",Length[optimisedtargets]," regions.\n"];
 
-header=Join[{"#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"},samples];
-WriteString[stream,StringJoinWith[header,"\t"],"\n"];WriteString[keepallstream,StringJoinWith[header,"\t"],"\n"];
+header=StringJoinWith[#,"\t"]&@Join[{"#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"},samples];
+vcfmeta=VcfMetaLines[];
+WriteString[stream,vcfmeta,"\n",header,"\n"];WriteString[keepallstream,vcfmeta,"\n",header,"\n"];
 
 Do[region=MakeCoordinateString[If[ListQ[#[[2]]],{#[[1]],Min[#[[2]]],Max[#[[2]]]},#]]&@optimisedtargets[[j]];
 WriteString[logstream,"=================================================================\n",
@@ -1439,12 +1573,12 @@ tm=DateString[],"\tStarted to process region ",j,".\tCoordinates ",region,"\tNum
 (*WriteString[logstream,"Finished FindAllelesAndCountReads\n"];*)
 If[res[[1]]=!={},
 vcflines=Table[
-ConvertVariantToVcfLine[res[[1,j]],FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Genotype2D,GenotypeReadCounts}]],{j,1,res[[1]]//Length}];
+ConvertVariantToVcfLine[res[[1,j]],FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Split2D,GenotypeReadCounts}]],{j,1,res[[1]]//Length}];
 strng=StringJoinWith[StringJoinWith[#,"\t"]&/@vcflines,"\n"];
 WriteString[keepallstream,strng,"\n"];
 
-vcflinesnofake=RemoveFakeAlleles/@vcflines;
-vcflinesnofakepass=Pick[vcflinesnofake,vcflinesnofake[[All,7]],"PASS"];
+vcflinesnofake=RemoveDummyAlleles/@vcflines;
+vcflinesnofakepass=Pick[vcflinesnofake,vcflinesnofake[[All,7]],"."];
 If[vcflinesnofakepass=!={},
 (WriteString[logstream,DateString[],"\tWriting ",vcflinesnofakepass//Length," variants to VCF file.\n"];
 strng=StringJoinWith[StringJoinWith[#,"\t"]&/@vcflinesnofakepass,"\n"];
@@ -1468,122 +1602,32 @@ Close[keepallstream];
 Close[problemstream];
 If[And[logstream=!="stdout",logstream=!="stderr"],Close[logstream]];
 
-Remove[samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,logfile,logstream,region,samtoolscheck,tm,tm0,targets,optimisedtargets,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass];
+Remove[samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,logfile,logstream,region,samtoolscheck,tm,tm0,targets,optimisedtargets,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass,vcfmeta];
 
 varcount
 ];
 
 
-(*RunVariantCalling[bamfiles_,targetbedfile_String,region_,outputvcffile_String,optns:OptionsPattern[{LoadBedTargets,FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Genotype2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{bed,targets,flbam,optimisedtargets},
-(*If[targetbedfile==="",
-bed=targets={{}},
-(bed=RunExternal["cut -f 1,2,3 "<>targetbedfile,{Word,Number,Number}];
-targets=Join@@Table[Prepend[#,rrr[[1,1]]]&/@CombineRegions[({1,0}+#)&/@rrr[[All,2;;3]]],{rrr,GatherBy[bed,First]}])
-];*)
-targets=LoadBedTargets[targetbedfile,FilterRules[{optns},Options[LoadBedTargets]]];
-Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,PrintError["The bam files are ill-defined.\nAborting!"];Abort[]];
-optimisedtargets=OptimiseTargets[flbam,targets,region];
-CallVariants[flbam,optimisedtargets,outputvcffile]
-];*)
+VcfMetaLines[]:=StringJoinWith[#,"\n"]&@{"##fileformat=VCFv4.2",
 
+"##fileDate="<>DateString[Date[],{"Year", "-","Month","-","Day","|","Hour",":","Minute",":","Second"}],
 
-(*CallVariants::usage=
-"CallVariants[bamfiles_, targets_List, outputvcffile_String, FailedLogFileName\[Rule]Automatic, LogFileName->Automatic]
-The function calls variants and saves them in a vcf file.
-Input: bamfiles is a list of bam files (one individual per each bam file) or a string like \"*.bam\" or \"D????_duplmarked.bam\" that is converted to a list of files using unix command 'ls'.
-targets is a list of regions in the form accepted by ScanForVariantCandidates.
-outputvcffile is the name of the file to save the variants in.
- Output: the total number of variants (lines in the VCF file) detected.";
-Options[CallVariants]={(*SampleLabels\[Rule]"FromFileNames"*)FailedLogFileName\[Rule]Automatic,LogFileName->Automatic};
-CallVariants[bamfiles_,targets0_List,outputvcffile_String,optns:OptionsPattern[{FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Genotype2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{flbam,samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,varcount,logfile,logstream,coveragefile,region,samtoolscheck,tm,tm0,targets,optnstoreport},
+"##source="<>"TidyVar"<>If[StringQ[$TidyVarVersion],".version"<>$TidyVarVersion,""],
 
-optnstoreport={FastaFileName,MinimalBaseSequencingScore,MinimalReadMappingScore,MinimalCoverage,SamtoolsFlagFilter,VariantThreshold,LogFileName,FailedLogFileName};
+If[StringQ[GenomeFastaFile],"##reference=file://"<>GenomeFastaFile,"##reference=\"Not specified\""],
 
-tm0=DateList[];
+"##phasing=none",
+"##INFO=<ID=AF,Number=A,Type=Float,Description=\"Allele Frequency\">",
+"##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Total allele number equal to the number of individuals with defined genotypes times ploidity\">",
+"##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total allele count for each allele in individuals with defined genotypes, AF=AC/AN \">",
+"##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Combined (across all samples) number of reads covering the variant\">",
+"##INFO=<ID=DM,Number=1,Type=String,Description=\"Dummy alleles - alleles that are not called in any individual genotype in the cohort, but there are still reads supporting them\">",
 
-If[$OperatingSystem==="Windows",PrintError["Sorry TidyVar doesn't work under Windows operating system, please try it on Linux or MacOS.\nAborting."];Abort[]];
-
-samtoolscheck=RunExternal[SamtoolsPath<>"samtools --version 2>&1"];
-If[Not[And@@StringFreeQ[samtoolscheck,"not found"]],PrintError["samtools not found!\nAborting."];Abort[]];
-
-Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,Return["The bam files are ill-defined"]];
-
-If[ListQ[targets0[[1]]],targets=targets0,targets={targets0}];
-
-varcount=0;
-samples=FileBaseName/@flbam;
-
-coveragefile=OptionValue[SaveCoverage];
-
-If[coveragefile,coveragefile=AppendFileName[outputvcffile,".coverage","txt"]];
-
-If[And[StringQ[coveragefile],FileExistsQ[coveragefile]],RenameFileForced[coveragefile,AppendFileName[coveragefile,".old"],KeepOldFile\[Rule]False]];
-If[StringQ[coveragefile],WriteString[coveragefile,StringJoinWith[Join[{"#CHROM","POS"},samples],"\t"],"\n"];Close[coveragefile]];
-
-stream=OpenWrite[outputvcffile];
-
-problemfile=Switch[OptionValue[FailedLogFileName],Automatic,AppendFileName[outputvcffile,".failed","txt"],
-_String,OptionValue[FailedLogFileName],
-__,PrintError["The option value of FailedLogFileName ",OptionValue[FailedLogFileName]," is not recognized.\nIt must be a string or 'Automatic'.\nAborting."];Abort[]];
-
-problemstream=OpenWrite[problemfile];
-
-logfile=Switch[OptionValue[LogFileName],Automatic,AppendFileName[outputvcffile,".log","txt"],
-_String,OptionValue[LogFileName],
-__,PrintError["The option value of LogFileName ",OptionValue[LogFileName]," is not recognized.\nIt must be a string or 'Automatic'.\nAborting."];Abort[]];
-
-logstream=Switch[logfile,
-"stdout","stdout",
-"stderr","stderr",
-__,OpenWrite[logfile]];
-
-WriteString[logstream,DateString[],"\tTidyVar by Boris Noyvert, Greg Elgar lab.\tVersion ",$TidyVarVersion,"\n"];
-
-WriteString[logstream,DateString[],"\tTidyVar Options: ",StringJoinWith[Table[rrr\[Rule]OptionValue[rrr],{rrr,optnstoreport}],", "]," .\n"];
-
-WriteString[logstream,DateString[],"\tUsing Wolfram Mathematica.\tVersion ",$Version,"\n"];
-
-WriteString[logstream,DateString[],"\tUsing samtools.\t",StringJoinWith[samtoolscheck,"\t"],"\n"];
-
-WriteString[logstream,DateString[],"\tFound ",Length[flbam]," bam files.\n"];
-
-WriteString[logstream,DateString[],"\tStarted to call variants in ",Length[targets]," regions.\n"];
-
-header=Join[{"#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"},samples];
-WriteString[stream,StringJoinWith[header,"\t"],"\n"];
-
-Do[region=MakeCoordinateString[If[ListQ[#[[2]]],{#[[1]],Min[#[[2]]],Max[#[[2]]]},#]]&@targets[[j]];
-WriteString[logstream,"=================================================================\n",
-tm=DateString[],"\tStarted to process region ",j,".\tCoordinates ",region,"\tNumber of targets: ",If[MatrixQ[targets[[j,2]]],Length[targets[[j,2]]],1],"\n"];
-(res=FindAllelesAndCountReads[flbam,targets[[j]],SaveCoverage\[Rule]coveragefile,LogStream\[Rule]logstream,FilterRules[{optns},Options/@{FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles}]]);
-(*WriteString[logstream,"Finished FindAllelesAndCountReads\n"];*)
-If[res[[1]]=!={},
-vcflines=Table[
-ConvertVariantToVcfLine[res[[1,j]],FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Genotype2D,GenotypeReadCounts}]],{j,1,res[[1]]//Length}];
-WriteString[logstream,DateString[],"\tWriting ",res[[1]]//Length," variants to VCF file.\n"];
-strng=StringJoinWith[StringJoinWith[#,"\t"]&/@vcflines,"\n"];
-WriteString[stream,strng,"\n"];
-varcount+=Length[res[[1]]]
-];
-
-If[res[[2]]=!={},
-strng=StringJoinWith[StringJoinWith[#,"\t"]&/@((Flatten/@res[[2]])[[All,1;;6]]),"\n"];
-WriteString[problemstream,strng,"\n"]
-];
-WriteString[logstream,DateString[],"\tFinished to process region ",j,".\tCoordinates ",region,".\t",NumberForm[-DateDifference[tm,"Second"][[1]],{10,1},ExponentFunction\[Rule](Null&)]," seconds.\n",
-"=================================================================\n"];
-,{j,1,Length[targets]}];
-
-WriteString[logstream,DateString[],"\tFinished to call variants.\tTotal running time ",MyRunningTime[tm0],". Found ",varcount," variant sites.\n"];
-
-Close[stream];
-Close[problemstream];
-If[And[logstream=!="stdout",logstream=!="stderr"],Close[logstream]];
-
-Remove[samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,logfile,logstream,region,samtoolscheck,tm,tm0,targets];
-
-varcount
-];*)
+"##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+"##FORMAT=<ID=AD,Number=R,Type=Integer,Description=\"Allelic depths (number of reads supporting the allele) for the reference and alternative alleles in the order listed\">",
+"##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth - sum of AD\">",
+"##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality - minimal nonzero PL\">",
+"##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"Phred likelihoods for all possible genotypes\">"};
 
 
 MyRunningTime[tm_]:=Module[{dd},
@@ -1621,9 +1665,6 @@ The function uses samtools idxstats to get a list of chromosomes and the number 
 Input: bam file name.
 Output: {{chr1, Nreads(chr1)},{chr2, Nreads(chr2)},...}";
 ReadsByChromosomeBam[bamfile_String]:=Module[{inputfile,cmd},
-
-(*inputfile=bamfile//FullFileName;
-CheckFileExistence[inputfile];*)
 
 cmd=StringJoinWith[{SamtoolsPath<>"samtools idxstats",bamfile}];
 
@@ -1713,7 +1754,6 @@ result=Join@@Table[OptimiseTargetsChromosome[bamfiles[[mdl]],If[Flatten[targetsc
 
 Remove[l,readschr,totalreads,readnumbercoef,mdl,regionchrlist,region,chrtargetps,targetschr,regionandtargetsdefined,chrlistps,indx,readlength,step,rl];
 
-(*If[ListQ[result[[1]]],result,{result}];*)
 result
 ];
 
@@ -1772,7 +1812,7 @@ Join@@ttt
 
 Options[CheckSamtoolsIsInstalled]={OutputStream->"stdout"};
 CheckSamtoolsIsInstalled[path_String:"",OptionsPattern[CheckSamtoolsIsInstalled]]:=Module[{check},
-check=RunExternal[(*If[path==="","samtools",FileNameJoin[{path,"samtools"}]]<>*)path<>"samtools --version 2>&1"];
+check=RunExternal[path<>"samtools --version 2>&1"];
 If[OptionValue[OutputStream]=!="",WriteString[OptionValue[OutputStream],StringJoinWith[check,"\n"],"\n"]];
 And@@StringFreeQ[check,{"not found","Permission denied","not recognized"},IgnoreCase->True]
 ];
@@ -1803,7 +1843,7 @@ If[l>5,
 SamtoolsPath="";
 
 
-TidyVarTmpDirectory="/tmp/TidyVar/";
+TidyVarTmpDirectory=FileNameJoin[{$TemporaryDirectory,"TidyVar"}];
 If[Not[DirectoryQ[TidyVarTmpDirectory]],CreateDirectory[TidyVarTmpDirectory]];
 
 
@@ -1811,3 +1851,6 @@ End[];
 
 
 EndPackage[]
+
+
+
