@@ -22,7 +22,7 @@
 BeginPackage["TidyVar`"];
 
 
-$TidyVarVersion="0.2.1";
+$TidyVarVersion="0.2.2";
 
 
 Print["TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016."];
@@ -77,19 +77,22 @@ FastaFileName
 ExtendTargetsBy
 
 
+MinimalCoverage
+
+
+MinimalNumberNonreferenceReads
+
+
+MinimalRatioNonreferenceReads
+
+
 MinimalBaseSequencingScore
 
 
 MinimalReadMappingScore
 
 
-MinimalCoverage
-
-
 SamtoolsFlagFilter
-
-
-VariantThreshold
 
 
 LogFileName
@@ -165,14 +168,27 @@ True]
 ];
 
 
-RunExternal::usage="RunExternal[command_String, types_:\"String\", op:OptionsPattern[ReadList]] basically calls ReadList built-in function.
-It runs external (Unix) command and loads its result as a table of elements of specified types, e.g. {Number, Word, Word}.";
-RunExternal[command_String,types_:"String",op:OptionsPattern[ReadList]]:=ReadList["!"<>command,types,op];
-
-
 StringJoinWith[x_List,rifflestring_String:" "]:=StringJoin[Riffle[ToString/@Flatten[x],rifflestring]];
 
 MakeTableString[x_List]:=StringJoinWith[StringJoinWith[#,"\t"]&/@x,"\n"]
+
+
+RunExternal::usage="RunExternal[command_String, types_:\"String\", op:OptionsPattern[ReadList]] basically calls ReadList built-in function.
+It runs external (Linux) command and loads its result as a table of elements of specified types, e.g. {Number, Word, Word}.
+In Mathematica 10 and later there is a problem with the management of virtual memory, so the result is first saved in a temporary file and then loaded into Mathematica.";
+Options[RunExternal]={TmpDirectory->TidyVarTmpDirectory};
+RunExternal[command_String,Optional[types:PatternTest[_,FreeQ[#,Rule]&],"String"],op:OptionsPattern[{ReadList,RunExternal}]]:=Module[{tmpfile,result,code,opRL},
+opRL=FilterRules[{op},Options[ReadList]];
+If[$VersionNumber<9.5,
+Return[ReadList["!"<>command,types,opRL]]];
+tmpfile=FileNameJoin[{OptionValue[TmpDirectory],"runexternal_temp_"<>FromCharacterCode[RandomInteger[{97,122},10]]}];
+code=Run[command<>" > "<>tmpfile];
+result=If[code=!=0,
+"Wrong command, code:"<>ToString[code],
+ReadList[tmpfile,types,opRL]];
+DeleteFile[tmpfile];
+result
+];
 
 
 IntersectionPositionsSimple[d1_List,d2_List]:=Module[{int,res},
@@ -389,7 +405,7 @@ If[bestcluster0===bestcluster,Break[]];
 p=N[#/Plus@@#]&/@Total[GatherBy[{readcounts,bestcluster}//Transpose,Last][[All,All,1]],{2}]//Sort;
 If[OptionValue[PrintReports]===True,Print[p]];
 bestcluster0=bestcluster,
-{Length[readcounts]}];
+{Max[2Length[readcounts],10]}];
 {Insert[bestcluster,0,psinsert],p}
 ];
 
@@ -1268,21 +1284,34 @@ Remove[flbam,chr,suspectedvariants,l,readlength,actualreadlength,seqcoord,reslen
 ];
 
 
-ScanForVariantCandidates::usage="ScanForVariantCandidates[bamfiles_, inputregion_, FastaFileName->FastaPath<>\"human_g1k_v37.fa\", MinimalCoverage\[Rule]6, VariantThreshold\[Rule]0.2, SamtoolsFlagFilter\[Rule]\"0x704\", MinimalBaseSequencingScore\[Rule]13, MinimalReadMappingScore\[Rule]30, SaveCoverage\[Rule]False]
-The function runs samtools mpileup, loads the output as a table, identifies the samples and positions where there is some variation, i.e. read number >= MinimalCoverage and number of nonreference reads > VariantThreshold times total number of reads for the sample. Produces the coordinates of identified variants, the min and max estimates of variant base length and the maximal non-reference read ratio.
-Input: bamfiles is a list of bam files (one individual per each file) or a string like \"*.bam\" or \"D????_duplmarked.bam\" that is converted to a list of files using unix command 'ls'. 
+ScanForVariantCandidates::usage="ScanForVariantCandidates[bamfiles_, inputregion_, FastaFileName->GenomeFastaFile, MinimalCoverage\[Rule]10, MinimalRatioNonreferenceReads\[Rule]0.2, MinimalNumberNonreferenceReads\[Rule]3, SamtoolsFlagFilter\[Rule]1796, MinimalBaseSequencingScore\[Rule]13, MinimalReadMappingScore\[Rule]30, SaveCoverage\[Rule]False]
+The function runs samtools mpileup, loads the output as a table, identifies the samples and positions where there is some variation, i.e. read number >= MinimalCoverage and number of nonreference reads >= MinimalNumberNonreferenceReads and the ratio of nonreference reads > MinimalRatioNonreferenceReads for at least one sample. Produces the coordinates of identified variants, the min and max estimates of variant base length and the maximal non-reference read ratio.
+Input: bamfiles is a list of bam files (one individual per each file) or a string like \"*.bam\" or \"D????.bam\" that is converted to a list of files using unix command 'ls'. 
 inputregion specifies the region to scan for variant candidates in. It can be in the form of a coordinate string like \"chr1:10000000-10000300\", or coordinate list like {chr1,10000000,10000300}, or for multiple regions to be scanned in one go like {chr1,{{10000000,10000300},{20000000,20000300}...}}.
 Output: A list of variant candidates, each in the following format: {{2784882,2784886}, {1,5}, 0.224}, where the first two numbers are the coordinates of the affected site on the reference genome, the second two numbers are the estimate for the min and max size of the allele sequences, the last number is the maximal ratio of nonreference reads per individual. 
 Option FastaFileName specifies the fasta file with the DNA sequence, must be the same as the one used for read alignment.
 Option MinimalCoverage specifies the minimal (among the individuals) read coverage for the site to be scanned.
-Option VariantThreshold gives the ratio of non-reference reads to total reads that at least one individual must exceed for the cite to be taken into account.
-Option SamtoolsFlagFilter->\"0x704\" specifies the filter flags --ff in samtools mpileup command. The default filters out all reads for which one of the following flags is set:\[IndentingNewLine]0x4 (unmapped), 0x100 (not primary), 0x200 (failure), 0x400 (duplicate).
+Option MinimalRatioNonreferenceReads gives the ratio of non-reference reads to total reads that at least one individual must exceed for the site to be taken into account.
+Option MinimalNumberNonreferenceReads gives the number of non-reference reads that at least one individual must exceed for the site to be taken into account.
+Option SamtoolsFlagFilter->1796 specifies the filter flags --ff in \'samtools mpileup\' command. The default filters out all reads for which one of the following flags is set:\[IndentingNewLine]0x4 (unmapped), 0x100 (not primary), 0x200 (failure), 0x400 (duplicate).
 Option MinimalBaseSequencingScore\[Rule]13 specifies the minimal base sequencing quality score to be taken into account in mpileup. The default 13 corresponds to 10^(-1.3)=0.05 chance that the base was called in a wrong way.
-Option MinimalReadMappingScore\[Rule]1 specifies the minimal alignment score for the read to be included in mpileup. The score 0 is excluded by default, score 0 means that the read maps equally well to more than one location.
-Last modification: 8 May 2015.";Options[ScanForVariantCandidates]={FastaFileName->GenomeFastaFile,MinimalCoverage->6,VariantThreshold->0.2,SamtoolsFlagFilter->"0x704",MinimalBaseSequencingScore->13,MinimalReadMappingScore->30,SaveCoverage->False,LogStream->False};
-ScanForVariantCandidates[bamfiles_,inputregion_,optns:OptionsPattern[{ScanForVariantCandidates}]]:=Module[{cov,thr,genomefasta,cmd,awkcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxscores,result,savecoverage,teecmd,coveragefile,logs,tm},
+Option MinimalReadMappingScore\[Rule]30 specifies the minimal alignment score for the read to be included in mpileup. Score 60 is the maximum in the BWA read alignment output, score 0 means that the read maps equally well to more than one location.
+Last modification: 21 Nov 2016.";
+Options[ScanForVariantCandidates]={
+FastaFileName->GenomeFastaFile,
+MinimalCoverage->6,
+MinimalRatioNonreferenceReads->0.2,
+MinimalNumberNonreferenceReads->3,
+SamtoolsFlagFilter->"1796",
+MinimalBaseSequencingScore->13,
+MinimalReadMappingScore->30,
+SaveCoverage->False,
+LogStream->False
+};
+ScanForVariantCandidates[bamfiles_,inputregion_,optns:OptionsPattern[{ScanForVariantCandidates}]]:=Module[{cov,thr,genomefasta,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts,result},
 cov=OptionValue[MinimalCoverage];
-thr=OptionValue[VariantThreshold];
+thr=OptionValue[MinimalRatioNonreferenceReads];
+nonrefmin=OptionValue[MinimalNumberNonreferenceReads];
 genomefasta= OptionValue[FastaFileName];
 CheckFileExistence[genomefasta];
 logs=OptionValue[LogStream];
@@ -1308,19 +1337,29 @@ Close[regionbedfile])
 Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,PrintError["The bam files are ill-defined.\nAborting!"];
 Abort[]];
 
+(bamlistfile=FileNameJoin[{TidyVarTmpDirectory,"bam_temp_"<>FromCharacterCode[RandomInteger[{97,122},10]]<>".txt"}];
+WriteString[bamlistfile,
+StringJoinWith[flbam,"\n"],"\n"
+];
+Close[bamlistfile]);
+
 (* Get the pileup using samtools mpileup *)
 
 l=flbam//Length;
 
 region={inputregion[[1]],{Min[#],Max[#]}&@inputregion[[2;;]]};
 
-(* The awk command checks that the coverage of at least one sample is above the threshold and also removes the base quality columns *)
+(* The awk command checks that the coverage of at least one sample is above the threshold *)
 
-awkcmd="awk '"<>
+(*awkcmd="awk '"<>
 "BEGIN {FS=\"\\t\"; OFS=\"\\t\"} "<>
-StringDrop[StringJoin[("$"<>ToString[#]<>">="<>ToString[cov]<>"||")&/@(1+3Range[l])],-2]<>" {print $1,$2,$3"<>StringJoin[(",$"<>ToString[#])&/@Riffle[(1+3Range[l]),(2+3Range[l])]]<>" }'"; 
+StringDrop[StringJoin[("$"<>ToString[#]<>">="<>ToString[cov]<>"||")&/@(1+3Range[l])],-2]<>" {print $1,$2,$3"<>StringJoin[(",$"<>ToString[#])&/@Riffle[(1+3Range[l]),(2+3Range[l])]]<>" }'"; *)
 
-(* cutcmd="cut --complement -f"<>StringJoinWithCommas[(3+3Range[l])]<>" -";*)
+awkcmd="awk 'BEGIN {FS=\"\\t\"} { for (i = 1; i <= "<>ToString[l]<>"; ++i) { if ($(1+3*i)>="<>ToString[cov]<>") { print $0; break } }  }'";
+
+(* The cut command removes  *) 
+
+ cutcmd="cut --complement -f"<>StringJoinWith[(3+3Range[l]),","]<>" -";
 
 If[savecoverage,teecmd=" | tee /dev/fd/3 | cut --complement -f "<>StringJoinWith[(3+2Range[0,l]),","]<>" >> "<>coveragefile<>" ) 3>&1"];
 
@@ -1336,24 +1375,36 @@ If[OptionValue[MinimalReadMappingScore]===0,"",{"-q",OptionValue[MinimalReadMapp
 "-f" ,genomefasta,
  "-r",(region//MakeCoordinateString),
 If[multiregioncalculation,{"-l",regionbedfile},""],
-flbam,
-"|",awkcmd(*cutcmd*)
+(*flbam*)
+"-b",bamlistfile,
+"2> /dev/null",
+"|",awkcmd,
+"|",cutcmd
 ,If[savecoverage,teecmd,")"]}//StringJoinWith;
-
 
 types=Flatten[{Word,Number,Word,Table[{Number,Word},{l}]}];
 (*Return[RunExternal[cmd,String]];*)
 mpileup=RunExternal[cmd,types,WordSeparators->"\t",NullWords->True];
 (*mpileup//Dimensions)//AbsoluteTiming//Print;*)
 If[multiregioncalculation,DeleteFile[regionbedfile]];
+DeleteFile[bamlistfile];
 
 (* The coverage columns are flattened to one long list *)
 coverage=Join@@mpileup[[All,4;;-1;;2]];
 highcovpos=Join@@Position[Sign[coverage-(cov-1)],1,{1},Heads->False];
 highcovmpileup=(Join@@mpileup[[All,5;;-1;;2]])[[highcovpos]];
-strcount=StringCount[highcovmpileup,LetterCharacter(*{"+"~~DigitCharacter..~~LetterCharacter..,"-"~~DigitCharacter..~~LetterCharacter..,LetterCharacter}*)
-(* Not really right *),Overlaps->False];
-posabovethreshold=Join@@Position[Sign[(strcount//N)/(coverage[[highcovpos]]//N)-thr],1,{1}];
+
+indelpatterns=
+("+"|"-"~~ToString[#]~~Repeated["A"|"C"|"G"|"T",#]&/@Range[10,1,-1]);
+ptrn=Join[indelpatterns,{"A"|"C"|"G"|"T"}];
+strcount=StringCount[highcovmpileup,ptrn,Overlaps->False,IgnoreCase->True];
+
+(*strcount=StringCount[highcovmpileup,LetterCharacter(*{"+"~~DigitCharacter..~~LetterCharacter..,"-"~~DigitCharacter..~~LetterCharacter..,LetterCharacter}*)
+(* Not really right *),Overlaps\[Rule]False];*)
+
+posaboveminimum=Join@@Position[Sign[strcount-(nonrefmin-1)],1,{1}];
+posabovethreshold=posaboveminimum[[Join@@Position[Sign[(strcount[[posaboveminimum]]//N)/(coverage[[highcovpos[[posaboveminimum]]]]//N)-thr],1,{1}]]];
+(*posabovethreshold=Join@@Position[Sign[(strcount//N)/(coverage[[highcovpos]]//N)-thr],1,{1}];*)
 
 (*If[posabovethreshold==={},Return[{}]];*)
 
@@ -1363,17 +1414,17 @@ If[posabovethreshold=!={},
 deletioninsertioncases=If[#==={},{0,0},{Min[Min[#],0],Max[Max[#],0]}(*Sort[Append[#,0]][[{1,-1}]]*)]&/@Map[ToExpression,StringCases[highcovmpileup[[posabovethreshold]],("+"|"-")~~DigitCharacter..(*yyy:(("+"|"-")~~DigitCharacter..)~~LetterCharacter..\[Rule]yyy*)],{2}];
 
 (* Unflattens the long list, counts the position, length and possible number of bases for each variant *)
-{varpos,varlength,sublength,maxscores}=Transpose[{#[[1,1]],un=(Union@@(#[[All,2]]))[[{1,-1}]];-un[[1]],un-un[[1]]+1,Max[#[[All,3]]]}&/@GatherBy[Transpose[{Quotient[highcovpos[[posabovethreshold]],l,1]+1,deletioninsertioncases,(strcount[[posabovethreshold]]//N)/(coverage[[highcovpos[[posabovethreshold]]]]//N)}],First]
+{varpos,varlength,sublength,maxratios,maxcounts}=Transpose[{#[[1,1]],un=(Union@@(#[[All,2]]))[[{1,-1}]];-un[[1]],un-un[[1]]+1,Max[#[[All,3]]],Max[#[[All,4]]]}&/@GatherBy[Transpose[{Quotient[highcovpos[[posabovethreshold]],l,1]+1,deletioninsertioncases,((nonrefcount=strcount[[posabovethreshold]])//N)/(coverage[[highcovpos[[posabovethreshold]]]]//N),nonrefcount}],First]
 ];
 
-result={Transpose[{mpileup[[varpos,2]],mpileup[[varpos,2]]+varlength}],sublength,maxscores}//Transpose;
+result={Transpose[{mpileup[[varpos,2]],mpileup[[varpos,2]]+varlength}],sublength,maxratios,maxcounts}//Transpose;
 ,
 result={}
 ];
 
 If[logs=!=False,WriteString[logs,DateString[],"\tFinished the initial variant scan. Found ",Length[result]," potential variant locations.\t",NumberForm[-DateDifference[tm,"Second"][[1]],{10,1},ExponentFunction->(Null&)]," seconds.\n"]];
 
-Remove[cov,thr,genomefasta,cmd,awkcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxscores,savecoverage,teecmd,coveragefile,logs,tm];
+Remove[cov,thr,genomefasta,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts];
 
 result
 ];
@@ -1500,7 +1551,7 @@ outputvcffile is the name of the file to save the variants in.
 Options[CallVariants]={(*SampleLabels\[Rule]"FromFileNames"*)FailedLogFileName->Automatic,LogFileName->Automatic,OptimiseTargets->True};
 CallVariants[bamfiles_,outputvcffile_String,targets0_:"",region0_:"",optns:OptionsPattern[{LoadBedTargets,FindAllelesAndCountReads,ScanForVariantCandidates,GetReadsFromBamFiles,GetSequenceFromGenomeFasta,Split2D,CallVariants,OptimiseTargets,OptimiseTargetsChromosome}]]:=Module[{flbam,samples,header,stream,res,vcflines,problems,strng,problemfile,problemstream,varcount,logfile,logstream,coveragefile,region,samtoolscheck,tm,tm0,targets,optimisedtargets,optnstoreport,outputvcffilekeepall,keepallstream,vcflinesnofake,vcflinesnofakepass,vcfmeta},
 
-optnstoreport={FastaFileName,ExtendTargetsBy,MinimalBaseSequencingScore,MinimalReadMappingScore,MinimalCoverage,SamtoolsFlagFilter,VariantThreshold,SaveCoverage,LogFileName,FailedLogFileName};
+optnstoreport={FastaFileName,ExtendTargetsBy,MinimalCoverage,MinimalRatioNonreferenceReads,MinimalNumberNonreferenceReads,MinimalBaseSequencingScore,MinimalReadMappingScore,SamtoolsFlagFilter,SaveCoverage,LogFileName,FailedLogFileName};
 
 tm0=DateList[];
 
@@ -1573,7 +1624,7 @@ tm=DateString[],"\tStarted to process region ",j,".\tCoordinates ",region,"\tNum
 (*WriteString[logstream,"Finished FindAllelesAndCountReads\n"];*)
 If[res[[1]]=!={},
 vcflines=Table[
-ConvertVariantToVcfLine[res[[1,j]],FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Split2D,GenotypeReadCounts}]],{j,1,res[[1]]//Length}];
+ConvertVariantToVcfLine[res[[1,jj]],FilterRules[{optns},Options/@{ConvertVariantToVcfLine,Split2D,GenotypeReadCounts}]],{jj,1,res[[1]]//Length}];
 strng=StringJoinWith[StringJoinWith[#,"\t"]&/@vcflines,"\n"];
 WriteString[keepallstream,strng,"\n"];
 
@@ -1850,7 +1901,4 @@ If[Not[DirectoryQ[TidyVarTmpDirectory]],CreateDirectory[TidyVarTmpDirectory]];
 End[];
 
 
-EndPackage[]
-
-
-
+EndPackage[];

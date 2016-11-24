@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    463012,      10659]
-NotebookOptionsPosition[    453776,      10370]
-NotebookOutlinePosition[    454291,      10390]
-CellTagsIndexPosition[    454248,      10387]
+NotebookDataLength[    474917,      10896]
+NotebookOptionsPosition[    465664,      10606]
+NotebookOutlinePosition[    466170,      10626]
+CellTagsIndexPosition[    466127,      10623]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -29,12 +29,13 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"$TidyVarVersion", "=", "\"\<0.2.1\>\""}], ";"}]], "Input",
+  RowBox[{"$TidyVarVersion", "=", "\"\<0.2.2\>\""}], ";"}]], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.643630742904566*^9, 3.643630764985176*^9}, 
    3.64363134316405*^9, 3.644132266075918*^9, {3.644577952603026*^9, 
    3.6445779531116543`*^9}, {3.644586542134328*^9, 3.6445865435282393`*^9}, {
-   3.6745496510998144`*^9, 3.6745496605535145`*^9}}],
+   3.6745496510998144`*^9, 3.6745496605535145`*^9}, 3.6856304515526743`*^9, 
+   3.6887231582438593`*^9}],
 
 Cell[CellGroupData[{
 
@@ -147,6 +148,19 @@ Cell[BoxData["ExtendTargetsBy"], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.650978497852827*^9, 3.650978497853631*^9}}],
 
+Cell[BoxData["MinimalCoverage"], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.650978511036491*^9, 3.6509785110372667`*^9}}],
+
+Cell[BoxData["MinimalNumberNonreferenceReads"], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.688744311249065*^9, 3.688744314572276*^9}}],
+
+Cell[BoxData["MinimalRatioNonreferenceReads"], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.650978523759951*^9, 3.650978523760675*^9}, 
+   3.687265691585493*^9}],
+
 Cell[BoxData["MinimalBaseSequencingScore"], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.650978381720415*^9, 3.65097838172124*^9}}],
@@ -155,17 +169,9 @@ Cell[BoxData["MinimalReadMappingScore"], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.650978476057135*^9, 3.650978476057866*^9}}],
 
-Cell[BoxData["MinimalCoverage"], "Input",
- InitializationCell->True,
- CellChangeTimes->{{3.650978511036491*^9, 3.6509785110372667`*^9}}],
-
 Cell[BoxData["SamtoolsFlagFilter"], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.6509785175604877`*^9, 3.6509785175612307`*^9}}],
-
-Cell[BoxData["VariantThreshold"], "Input",
- InitializationCell->True,
- CellChangeTimes->{{3.650978523759951*^9, 3.650978523760675*^9}}],
 
 Cell[BoxData["LogFileName"], "Input",
  InitializationCell->True,
@@ -220,7 +226,7 @@ Cell[BoxData["RemoveDummyAlleles"], "Input",
  CellChangeTimes->{{3.6750682346439667`*^9, 3.6750682361080503`*^9}, {
   3.6750685721972733`*^9, 3.6750685758394823`*^9}, {3.675068690565044*^9, 
   3.675068720416751*^9}}]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -468,31 +474,6 @@ aborted.\>\""}], ";"}], "\[IndentingNewLine]",
 Cell[BoxData[{
  RowBox[{
   RowBox[{
-   RowBox[{"RunExternal", "::", "usage"}], "=", 
-   "\"\<RunExternal[command_String, types_:\\\"String\\\", \
-op:OptionsPattern[ReadList]] basically calls ReadList built-in function.\nIt \
-runs external (Unix) command and loads its result as a table of elements of \
-specified types, e.g. {Number, Word, Word}.\>\""}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"RunExternal", "[", 
-    RowBox[{"command_String", ",", 
-     RowBox[{"types_:", "\"\<String\>\""}], ",", 
-     RowBox[{"op", ":", 
-      RowBox[{"OptionsPattern", "[", "ReadList", "]"}]}]}], "]"}], ":=", 
-   RowBox[{"ReadList", "[", 
-    RowBox[{
-     RowBox[{"\"\<!\>\"", "<>", "command"}], ",", "types", ",", "op"}], 
-    "]"}]}], ";"}]}], "Input",
- InitializationCell->True,
- CellChangeTimes->{{3.644580660957205*^9, 3.644580674638335*^9}, {
-  3.644580785150428*^9, 3.644580789690538*^9}, {3.644580910017935*^9, 
-  3.644581106216238*^9}}],
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{
    RowBox[{
     RowBox[{"StringJoinWith", "[", 
      RowBox[{"x_List", ",", 
@@ -515,7 +496,111 @@ Cell[BoxData[{
  InitializationCell->True,
  CellChangeTimes->{{3.644582503236074*^9, 3.644582553237443*^9}, {
   3.644583364677106*^9, 3.644583365449876*^9}, {3.64907775809583*^9, 
-  3.6490777657041388`*^9}}],
+  3.6490777657041388`*^9}, {3.68616542258955*^9, 3.686165427090448*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"RunExternal", "::", "usage"}], "=", 
+   "\"\<RunExternal[command_String, types_:\\\"String\\\", \
+op:OptionsPattern[ReadList]] basically calls ReadList built-in function.\nIt \
+runs external (Linux) command and loads its result as a table of elements of \
+specified types, e.g. {Number, Word, Word}.\nIn Mathematica 10 and later \
+there is a problem with the management of virtual memory, so the result is \
+first saved in a temporary file and then loaded into Mathematica.\>\""}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Options", "[", "RunExternal", "]"}], "=", 
+   RowBox[{"{", 
+    RowBox[{"TmpDirectory", "->", "TidyVarTmpDirectory"}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"RunExternal", "[", 
+    RowBox[{"command_String", ",", 
+     RowBox[{"Optional", "[", 
+      RowBox[{
+       RowBox[{"types", ":", 
+        RowBox[{"PatternTest", "[", 
+         RowBox[{"_", ",", 
+          RowBox[{
+           RowBox[{"FreeQ", "[", 
+            RowBox[{"#", ",", "Rule"}], "]"}], "&"}]}], "]"}]}], ",", 
+       "\"\<String\>\""}], "]"}], ",", 
+     RowBox[{"op", ":", 
+      RowBox[{"OptionsPattern", "[", 
+       RowBox[{"{", 
+        RowBox[{"ReadList", ",", "RunExternal"}], "}"}], "]"}]}]}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"tmpfile", ",", "result", ",", "code", ",", "opRL"}], "}"}], 
+     ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"opRL", "=", 
+       RowBox[{"FilterRules", "[", 
+        RowBox[{
+         RowBox[{"{", "op", "}"}], ",", 
+         RowBox[{"Options", "[", "ReadList", "]"}]}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"$VersionNumber", "<", "9.5"}], ",", "\[IndentingNewLine]", 
+        RowBox[{"Return", "[", 
+         RowBox[{"ReadList", "[", 
+          RowBox[{
+           RowBox[{"\"\<!\>\"", "<>", "command"}], ",", "types", ",", 
+           "opRL"}], "]"}], "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"tmpfile", "=", 
+       RowBox[{"FileNameJoin", "[", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"OptionValue", "[", "TmpDirectory", "]"}], ",", 
+          RowBox[{"\"\<runexternal_temp_\>\"", "<>", 
+           RowBox[{"FromCharacterCode", "[", 
+            RowBox[{"RandomInteger", "[", 
+             RowBox[{
+              RowBox[{"{", 
+               RowBox[{"97", ",", "122"}], "}"}], ",", "10"}], "]"}], 
+            "]"}]}]}], "}"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"code", "=", 
+       RowBox[{"Run", "[", 
+        RowBox[{"command", "<>", "\"\< > \>\"", "<>", "tmpfile"}], "]"}]}], 
+      ";", "\[IndentingNewLine]", 
+      RowBox[{"result", "=", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"code", "=!=", "0"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"\"\<Wrong command, code:\>\"", "<>", 
+          RowBox[{"ToString", "[", "code", "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"ReadList", "[", 
+          RowBox[{"tmpfile", ",", "types", ",", "opRL"}], "]"}]}], "]"}]}], 
+      ";", "\[IndentingNewLine]", 
+      RowBox[{"DeleteFile", "[", "tmpfile", "]"}], ";", "\[IndentingNewLine]",
+       "result"}]}], "\[IndentingNewLine]", "]"}]}], ";"}]}], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.644580660957205*^9, 3.644580674638335*^9}, {
+   3.644580785150428*^9, 3.644580789690538*^9}, {3.644580910017935*^9, 
+   3.644581106216238*^9}, {3.686999836338222*^9, 3.686999848260531*^9}, {
+   3.6870000085868883`*^9, 3.687000355784761*^9}, {3.6870023989721107`*^9, 
+   3.687002448481286*^9}, {3.687002606184578*^9, 3.6870026790173283`*^9}, {
+   3.6870876743515797`*^9, 3.6870876752456417`*^9}, 3.687087736640761*^9, {
+   3.6870877809270363`*^9, 3.687087876967284*^9}, {3.687087942280569*^9, 
+   3.687087994800144*^9}, 3.6870880827630863`*^9, {3.6870881295659323`*^9, 
+   3.687088171181189*^9}, {3.687088564299018*^9, 3.687088571198851*^9}, {
+   3.687089013490625*^9, 3.687089023885849*^9}, {3.6870894491952343`*^9, 
+   3.687089489321642*^9}, {3.687089570682139*^9, 3.6870895992552547`*^9}, {
+   3.687089951094219*^9, 3.687090027185965*^9}, 3.687090194354488*^9, {
+   3.687090285785074*^9, 3.6870902898387127`*^9}, {3.687090474203476*^9, 
+   3.6870904821128263`*^9}, {3.6870905438168087`*^9, 3.68709056697888*^9}, {
+   3.6870906177317266`*^9, 3.687090659009838*^9}, {3.68725272441498*^9, 
+   3.6872527500944767`*^9}, {3.687252782534034*^9, 3.6872527841854973`*^9}, {
+   3.6872529182141743`*^9, 3.687252920839857*^9}, {3.687253309073249*^9, 
+   3.6872533797787237`*^9}, 3.6872567351553993`*^9, {3.6872568365831633`*^9, 
+   3.687256839102461*^9}, {3.687256971608501*^9, 3.6872570402236977`*^9}, 
+   3.687257887562443*^9, 3.687258028262155*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -834,8 +919,8 @@ Cell[BoxData[
            RowBox[{"res", ",", 
             RowBox[{"ApplySort", "\[Rule]", "False"}], ",", 
             RowBox[{"CombineDistance", "\[Rule]", "dist"}]}], "]"}]}], 
-         "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}], 
-   "\[IndentingNewLine]", "\n", 
+         "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
    RowBox[{"(*", "\[IndentingNewLine]", 
     RowBox[{
     "Converts", " ", "a", " ", "list", " ", "of", " ", "integers", " ", "to", 
@@ -1729,8 +1814,11 @@ Cell[BoxData[
            RowBox[{"bestcluster0", "=", "bestcluster"}]}], ",", 
           "\[IndentingNewLine]", 
           RowBox[{"{", 
-           RowBox[{"Length", "[", "readcounts", "]"}], "}"}]}], "]"}], ";", 
-        "\[IndentingNewLine]", 
+           RowBox[{"Max", "[", 
+            RowBox[{
+             RowBox[{"2", 
+              RowBox[{"Length", "[", "readcounts", "]"}]}], ",", "10"}], 
+            "]"}], "}"}]}], "]"}], ";", "\[IndentingNewLine]", 
         RowBox[{"{", 
          RowBox[{
           RowBox[{"Insert", "[", 
@@ -1749,7 +1837,8 @@ Cell[BoxData[
    3.6716283357686768`*^9, {3.6720356851645236`*^9, 3.6720358869952984`*^9}, 
    3.6720360559786105`*^9, {3.6720375663187532`*^9, 3.6720375702665606`*^9}, {
    3.6724247162736483`*^9, 3.6724247285663514`*^9}, 3.675064031011533*^9, 
-   3.6750641103140683`*^9, {3.675064146564142*^9, 3.675064148140232*^9}}],
+   3.6750641103140683`*^9, {3.675064146564142*^9, 3.675064148140232*^9}, 
+   3.6836570739838*^9, {3.683657255538046*^9, 3.683657268917651*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -4214,7 +4303,7 @@ Cell[BoxData[{
    3.6745890225336905`*^9}, {3.674589504355994*^9, 3.6745895237094297`*^9}, {
    3.6745895738037252`*^9, 3.6745895738349257`*^9}, {3.6745896364880495`*^9, 
    3.6745896601132927`*^9}, 3.6750672136975718`*^9}]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -6284,8 +6373,7 @@ Cell[BoxData[
                RowBox[{"[", "1", "]"}], "]"}], ",", "1"}], "]"}], ",", 
             RowBox[{"ct", "[", 
              RowBox[{"[", "2", "]"}], "]"}]}], "}"}]}], "}"}]}]}], 
-      "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
-   "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", "\n", 
    RowBox[{"(*", " ", "\[IndentingNewLine]", 
     RowBox[{
     "Joins", " ", "all", " ", "subsequent", " ", "regions", " ", "with", " ", 
@@ -6296,7 +6384,8 @@ Cell[BoxData[
       "\[IndentingNewLine]", "Input"}], " ", "is", " ", "in", " ", "a", " ", 
      "form", " ", "of", " ", "list", " ", "of", " ", "pairs", " ", "of", " ", 
      
-     RowBox[{"numbers", "."}]}], "\[IndentingNewLine]", "*)"}], "\n", 
+     RowBox[{"numbers", "."}]}], "\[IndentingNewLine]", "*)"}], 
+   "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
      RowBox[{"Options", "[", "CombineRegionsWithCounts", "]"}], "=", 
@@ -6873,7 +6962,7 @@ Cell[BoxData[{
    3.644323050730926*^9, 3.64432307929247*^9}, {3.6445690069862127`*^9, 
    3.6445690073422956`*^9}, 3.644585413801957*^9, {3.675496816457288*^9, 
    3.6754968335812674`*^9}}]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -6887,19 +6976,21 @@ Cell[BoxData[{
   RowBox[{
    RowBox[{"ScanForVariantCandidates", "::", "usage"}], "=", 
    "\"\<ScanForVariantCandidates[bamfiles_, inputregion_, \
-FastaFileName->FastaPath<>\\\"human_g1k_v37.fa\\\", MinimalCoverage\[Rule]6, \
-VariantThreshold\[Rule]0.2, SamtoolsFlagFilter\[Rule]\\\"0x704\\\", \
+FastaFileName->GenomeFastaFile, MinimalCoverage\[Rule]10, \
+MinimalRatioNonreferenceReads\[Rule]0.2, \
+MinimalNumberNonreferenceReads\[Rule]3, SamtoolsFlagFilter\[Rule]1796, \
 MinimalBaseSequencingScore\[Rule]13, MinimalReadMappingScore\[Rule]30, \
 SaveCoverage\[Rule]False]\nThe function runs samtools mpileup, loads the \
 output as a table, identifies the samples and positions where there is some \
 variation, i.e. read number >= MinimalCoverage and number of nonreference \
-reads > VariantThreshold times total number of reads for the sample. Produces \
-the coordinates of identified variants, the min and max estimates of variant \
-base length and the maximal non-reference read ratio.\nInput: bamfiles is a \
-list of bam files (one individual per each file) or a string like \\\"*.bam\\\
-\" or \\\"D????_duplmarked.bam\\\" that is converted to a list of files using \
-unix command 'ls'. \ninputregion specifies the region to scan for variant \
-candidates in. It can be in the form of a coordinate string like \
+reads >= MinimalNumberNonreferenceReads and the ratio of nonreference reads > \
+MinimalRatioNonreferenceReads for at least one sample. Produces the \
+coordinates of identified variants, the min and max estimates of variant base \
+length and the maximal non-reference read ratio.\nInput: bamfiles is a list \
+of bam files (one individual per each file) or a string like \\\"*.bam\\\" or \
+\\\"D????.bam\\\" that is converted to a list of files using unix command \
+'ls'. \ninputregion specifies the region to scan for variant candidates in. \
+It can be in the form of a coordinate string like \
 \\\"chr1:10000000-10000300\\\", or coordinate list like \
 {chr1,10000000,10000300}, or for multiple regions to be scanned in one go \
 like {chr1,{{10000000,10000300},{20000000,20000300}...}}.\nOutput: A list of \
@@ -6911,32 +7002,44 @@ nonreference reads per individual. \nOption FastaFileName specifies the fasta \
 file with the DNA sequence, must be the same as the one used for read \
 alignment.\nOption MinimalCoverage specifies the minimal (among the \
 individuals) read coverage for the site to be scanned.\nOption \
-VariantThreshold gives the ratio of non-reference reads to total reads that \
-at least one individual must exceed for the cite to be taken into account.\n\
-Option SamtoolsFlagFilter->\\\"0x704\\\" specifies the filter flags --ff in \
-samtools mpileup command. The default filters out all reads for which one of \
-the following flags is set:\[IndentingNewLine]0x4 (unmapped), 0x100 (not \
-primary), 0x200 (failure), 0x400 (duplicate).\nOption \
+MinimalRatioNonreferenceReads gives the ratio of non-reference reads to total \
+reads that at least one individual must exceed for the site to be taken into \
+account.\nOption MinimalNumberNonreferenceReads gives the number of \
+non-reference reads that at least one individual must exceed for the site to \
+be taken into account.\nOption SamtoolsFlagFilter->1796 specifies the filter \
+flags --ff in \\'samtools mpileup\\' command. The default filters out all \
+reads for which one of the following flags is set:\[IndentingNewLine]0x4 \
+(unmapped), 0x100 (not primary), 0x200 (failure), 0x400 (duplicate).\nOption \
 MinimalBaseSequencingScore\[Rule]13 specifies the minimal base sequencing \
 quality score to be taken into account in mpileup. The default 13 corresponds \
 to 10^(-1.3)=0.05 chance that the base was called in a wrong way.\nOption \
-MinimalReadMappingScore\[Rule]1 specifies the minimal alignment score for the \
-read to be included in mpileup. The score 0 is excluded by default, score 0 \
-means that the read maps equally well to more than one location.\nLast \
-modification: 8 May 2015.\>\""}], ";", 
+MinimalReadMappingScore\[Rule]30 specifies the minimal alignment score for \
+the read to be included in mpileup. Score 60 is the maximum in the BWA read \
+alignment output, score 0 means that the read maps equally well to more than \
+one location.\nLast modification: 21 Nov 2016.\>\""}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
   RowBox[{
    RowBox[{"Options", "[", "ScanForVariantCandidates", "]"}], "=", 
-   RowBox[{"{", 
+   RowBox[{"{", "\[IndentingNewLine]", 
     RowBox[{
      RowBox[{"FastaFileName", "\[Rule]", "GenomeFastaFile"}], ",", 
-     RowBox[{"MinimalCoverage", "\[Rule]", "6"}], ",", 
-     RowBox[{"VariantThreshold", "\[Rule]", "0.2"}], ",", 
-     RowBox[{"SamtoolsFlagFilter", "\[Rule]", "\"\<0x704\>\""}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"MinimalCoverage", "\[Rule]", "6"}], ",", "\[IndentingNewLine]", 
+     
+     RowBox[{"MinimalRatioNonreferenceReads", "\[Rule]", "0.2"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"MinimalNumberNonreferenceReads", "\[Rule]", "3"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"SamtoolsFlagFilter", "\[Rule]", "\"\<1796\>\""}], ",", 
+     "\[IndentingNewLine]", 
      RowBox[{"MinimalBaseSequencingScore", "\[Rule]", "13"}], ",", 
+     "\[IndentingNewLine]", 
      RowBox[{"MinimalReadMappingScore", "\[Rule]", "30"}], ",", 
-     RowBox[{"SaveCoverage", "\[Rule]", "False"}], ",", 
-     RowBox[{"LogStream", "\[Rule]", "False"}]}], "}"}]}], 
-  ";"}], "\[IndentingNewLine]", 
+     "\[IndentingNewLine]", 
+     RowBox[{"SaveCoverage", "\[Rule]", "False"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"LogStream", "\[Rule]", "False"}]}], "\[IndentingNewLine]", 
+    "}"}]}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"ScanForVariantCandidates", "[", 
@@ -6949,21 +7052,26 @@ modification: 8 May 2015.\>\""}], ";",
      RowBox[{"{", 
       RowBox[{
       "cov", ",", "thr", ",", "genomefasta", ",", "cmd", ",", "awkcmd", ",", 
-       "flbam", ",", "l", ",", "region", ",", "types", ",", "mpileup", ",", 
-       "coverage", ",", "highcovpos", ",", "highcovmpileup", ",", "strcount", 
-       ",", "posabovethreshold", ",", "varpos", ",", "deletioninsertioncases",
-        ",", "varlength", ",", "sublength", ",", "un", ",", "selectpositions",
-        ",", "multiregioncalculation", ",", "regionbedfile", ",", "maxscores",
-        ",", "result", ",", "savecoverage", ",", "teecmd", ",", 
-       "coveragefile", ",", "logs", ",", "tm"}], "}"}], ",", 
+       "cutcmd", ",", "flbam", ",", "l", ",", "region", ",", "types", ",", 
+       "mpileup", ",", "coverage", ",", "highcovpos", ",", "highcovmpileup", 
+       ",", "strcount", ",", "posabovethreshold", ",", "varpos", ",", 
+       "deletioninsertioncases", ",", "varlength", ",", "sublength", ",", 
+       "un", ",", "selectpositions", ",", "multiregioncalculation", ",", 
+       "regionbedfile", ",", "maxratios", ",", "savecoverage", ",", "teecmd", 
+       ",", "coveragefile", ",", "logs", ",", "tm", ",", "indelpatterns", ",",
+        "ptrn", ",", "bamlistfile", ",", "nonrefmin", ",", "posaboveminimum", 
+       ",", "nonrefcount", ",", "maxcounts", ",", "result"}], "}"}], ",", 
      "\[IndentingNewLine]", 
      RowBox[{
       RowBox[{"cov", "=", 
        RowBox[{"OptionValue", "[", "MinimalCoverage", "]"}]}], ";", 
       "\[IndentingNewLine]", 
       RowBox[{"thr", "=", 
-       RowBox[{"OptionValue", "[", "VariantThreshold", "]"}]}], ";", 
-      "\[IndentingNewLine]", 
+       RowBox[{"OptionValue", "[", "MinimalRatioNonreferenceReads", "]"}]}], 
+      ";", "\[IndentingNewLine]", 
+      RowBox[{"nonrefmin", "=", 
+       RowBox[{"OptionValue", "[", "MinimalNumberNonreferenceReads", "]"}]}], 
+      ";", "\[IndentingNewLine]", 
       RowBox[{"genomefasta", "=", " ", 
        RowBox[{"OptionValue", "[", "FastaFileName", "]"}]}], ";", 
       "\[IndentingNewLine]", 
@@ -7070,6 +7178,27 @@ modification: 8 May 2015.\>\""}], ";",
          "\[IndentingNewLine]", 
          RowBox[{"Abort", "[", "]"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
       "\[IndentingNewLine]", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"bamlistfile", "=", 
+         RowBox[{"FileNameJoin", "[", 
+          RowBox[{"{", 
+           RowBox[{"TidyVarTmpDirectory", ",", 
+            RowBox[{"\"\<bam_temp_\>\"", "<>", 
+             RowBox[{"FromCharacterCode", "[", 
+              RowBox[{"RandomInteger", "[", 
+               RowBox[{
+                RowBox[{"{", 
+                 RowBox[{"97", ",", "122"}], "}"}], ",", "10"}], "]"}], "]"}],
+              "<>", "\"\<.txt\>\""}]}], "}"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"WriteString", "[", 
+         RowBox[{"bamlistfile", ",", "\[IndentingNewLine]", 
+          RowBox[{"StringJoinWith", "[", 
+           RowBox[{"flbam", ",", "\"\<\\n\>\""}], "]"}], ",", "\"\<\\n\>\""}],
+          "\[IndentingNewLine]", "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Close", "[", "bamlistfile", "]"}]}], ")"}], ";", 
+      "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{"(*", " ", 
        RowBox[{
        "Get", " ", "the", " ", "pileup", " ", "using", " ", "samtools", " ", 
@@ -7098,58 +7227,67 @@ modification: 8 May 2015.\>\""}], ";",
        "The", " ", "awk", " ", "command", " ", "checks", " ", "that", " ", 
         "the", " ", "coverage", " ", "of", " ", "at", " ", "least", " ", 
         "one", " ", "sample", " ", "is", " ", "above", " ", "the", " ", 
-        "threshold", " ", "and", " ", "also", " ", "removes", " ", "the", " ",
-         "base", " ", "quality", " ", "columns"}], " ", "*)"}], 
-      "\[IndentingNewLine]", "\[IndentingNewLine]", 
-      RowBox[{"awkcmd", "=", 
+        "threshold"}], " ", "*)"}], "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", 
        RowBox[{
-       "\"\<awk '\>\"", "<>", "\[IndentingNewLine]", 
-        "\"\<BEGIN {FS=\\\"\\\\t\\\"; OFS=\\\"\\\\t\\\"} \>\"", "<>", 
-        "\[IndentingNewLine]", 
-        RowBox[{"StringDrop", "[", 
+        RowBox[{"awkcmd", "=", 
          RowBox[{
+         "\"\<awk '\>\"", "<>", "\[IndentingNewLine]", 
+          "\"\<BEGIN {FS=\\\"\\\\t\\\"; OFS=\\\"\\\\t\\\"} \>\"", "<>", 
+          "\[IndentingNewLine]", 
+          RowBox[{"StringDrop", "[", 
+           RowBox[{
+            RowBox[{"StringJoin", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"(", 
+                RowBox[{"\"\<$\>\"", "<>", 
+                 RowBox[{"ToString", "[", "#", "]"}], "<>", "\"\<>=\>\"", "<>", 
+                 RowBox[{"ToString", "[", "cov", "]"}], "<>", "\"\<||\>\""}], 
+                ")"}], "&"}], "/@", 
+              RowBox[{"(", 
+               RowBox[{"1", "+", 
+                RowBox[{"3", 
+                 RowBox[{"Range", "[", "l", "]"}]}]}], ")"}]}], "]"}], ",", 
+            RowBox[{"-", "2"}]}], "]"}], "<>", "\"\< {print $1,$2,$3\>\"", "<>", 
           RowBox[{"StringJoin", "[", 
            RowBox[{
             RowBox[{
              RowBox[{"(", 
-              RowBox[{"\"\<$\>\"", "<>", 
-               RowBox[{"ToString", "[", "#", "]"}], "<>", "\"\<>=\>\"", "<>", 
-               
-               RowBox[{"ToString", "[", "cov", "]"}], "<>", "\"\<||\>\""}], 
-              ")"}], "&"}], "/@", 
-            RowBox[{"(", 
-             RowBox[{"1", "+", 
-              RowBox[{"3", 
-               RowBox[{"Range", "[", "l", "]"}]}]}], ")"}]}], "]"}], ",", 
-          RowBox[{"-", "2"}]}], "]"}], "<>", "\"\< {print $1,$2,$3\>\"", "<>", 
-        RowBox[{"StringJoin", "[", 
-         RowBox[{
-          RowBox[{
-           RowBox[{"(", 
-            RowBox[{"\"\<,$\>\"", "<>", 
-             RowBox[{"ToString", "[", "#", "]"}]}], ")"}], "&"}], "/@", 
-          RowBox[{"Riffle", "[", 
-           RowBox[{
-            RowBox[{"(", 
-             RowBox[{"1", "+", 
-              RowBox[{"3", 
-               RowBox[{"Range", "[", "l", "]"}]}]}], ")"}], ",", 
-            RowBox[{"(", 
-             RowBox[{"2", "+", 
-              RowBox[{"3", 
-               RowBox[{"Range", "[", "l", "]"}]}]}], ")"}]}], "]"}]}], "]"}], 
-        "<>", "\"\< }'\>\""}]}], ";", " ", "\[IndentingNewLine]", 
-      "\[IndentingNewLine]", 
+              RowBox[{"\"\<,$\>\"", "<>", 
+               RowBox[{"ToString", "[", "#", "]"}]}], ")"}], "&"}], "/@", 
+            RowBox[{"Riffle", "[", 
+             RowBox[{
+              RowBox[{"(", 
+               RowBox[{"1", "+", 
+                RowBox[{"3", 
+                 RowBox[{"Range", "[", "l", "]"}]}]}], ")"}], ",", 
+              RowBox[{"(", 
+               RowBox[{"2", "+", 
+                RowBox[{"3", 
+                 RowBox[{"Range", "[", "l", "]"}]}]}], ")"}]}], "]"}]}], 
+           "]"}], "<>", "\"\< }'\>\""}]}], ";"}], " ", "*)"}], 
+      "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      RowBox[{"awkcmd", "=", 
+       RowBox[{"\"\<awk 'BEGIN {FS=\\\"\\\\t\\\"} { for (i = 1; i <= \>\"", "<>", 
+        RowBox[{"ToString", "[", "l", "]"}], "<>", 
+        "\"\<; ++i) { if ($(1+3*i)>=\>\"", "<>", 
+        RowBox[{"ToString", "[", "cov", "]"}], "<>", 
+        "\"\<) { print $0; break } }  }'\>\""}]}], ";", "\[IndentingNewLine]",
+       "\[IndentingNewLine]", 
       RowBox[{"(*", " ", 
-       RowBox[{
-        RowBox[{"cutcmd", "=", 
-         RowBox[{"\"\<cut --complement -f\>\"", "<>", 
-          RowBox[{"StringJoinWithCommas", "[", 
-           RowBox[{"(", 
-            RowBox[{"3", "+", 
-             RowBox[{"3", 
-              RowBox[{"Range", "[", "l", "]"}]}]}], ")"}], "]"}], "<>", 
-          "\"\< -\>\""}]}], ";"}], "*)"}], "\[IndentingNewLine]", 
+       RowBox[{"The", " ", "cut", " ", "command", " ", "removes"}], "  ", 
+       "*)"}], " ", "\[IndentingNewLine]", "\[IndentingNewLine]", " ", 
+      RowBox[{"cutcmd", "=", 
+       RowBox[{"\"\<cut --complement -f\>\"", "<>", 
+        RowBox[{"StringJoinWith", "[", 
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{"3", "+", 
+            RowBox[{"3", 
+             RowBox[{"Range", "[", "l", "]"}]}]}], ")"}], ",", "\"\<,\>\""}], 
+         "]"}], "<>", "\"\< -\>\""}]}], ";", "\[IndentingNewLine]", 
       "\[IndentingNewLine]", 
       RowBox[{"If", "[", 
        RowBox[{"savecoverage", ",", 
@@ -7212,13 +7350,16 @@ modification: 8 May 2015.\>\""}], ";",
            RowBox[{"multiregioncalculation", ",", 
             RowBox[{"{", 
              RowBox[{"\"\<-l\>\"", ",", "regionbedfile"}], "}"}], ",", 
-            "\"\<\>\""}], "]"}], ",", "\[IndentingNewLine]", "flbam", ",", 
-          "\[IndentingNewLine]", "\"\<|\>\"", ",", "awkcmd", 
-          RowBox[{"(*", "cutcmd", "*)"}], "\[IndentingNewLine]", ",", 
+            "\"\<\>\""}], "]"}], ",", "\[IndentingNewLine]", 
+          RowBox[{"(*", "flbam", "*)"}], "\[IndentingNewLine]", "\"\<-b\>\"", 
+          ",", "bamlistfile", ",", "\[IndentingNewLine]", 
+          "\"\<2> /dev/null\>\"", ",", "\[IndentingNewLine]", "\"\<|\>\"", 
+          ",", "awkcmd", ",", "\[IndentingNewLine]", "\"\<|\>\"", ",", 
+          "cutcmd", "\[IndentingNewLine]", ",", 
           RowBox[{"If", "[", 
            RowBox[{"savecoverage", ",", "teecmd", ",", "\"\<)\>\""}], "]"}]}],
           "}"}], "//", "StringJoinWith"}]}], ";", "\[IndentingNewLine]", 
-      "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", 
       RowBox[{"types", "=", 
        RowBox[{"Flatten", "[", 
         RowBox[{"{", 
@@ -7252,6 +7393,8 @@ modification: 8 May 2015.\>\""}], ";",
       RowBox[{"If", "[", 
        RowBox[{"multiregioncalculation", ",", 
         RowBox[{"DeleteFile", "[", "regionbedfile", "]"}]}], "]"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"DeleteFile", "[", "bamlistfile", "]"}], ";", 
       "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{"(*", " ", 
        RowBox[{
@@ -7286,38 +7429,100 @@ modification: 8 May 2015.\>\""}], ";",
             RowBox[{"All", ",", 
              RowBox[{"5", ";;", 
               RowBox[{"-", "1"}], ";;", "2"}]}], "]"}], "]"}]}], ")"}], "[", 
-        RowBox[{"[", "highcovpos", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"[", "highcovpos", "]"}], "]"}]}], ";", "\[IndentingNewLine]",
+       "\[IndentingNewLine]", 
+      RowBox[{"indelpatterns", "=", "\[IndentingNewLine]", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\"\<+\>\"", "|", "\"\<-\>\""}], "~~", 
+           RowBox[{"ToString", "[", "#", "]"}], "~~", 
+           RowBox[{"Repeated", "[", 
+            RowBox[{
+             RowBox[{
+             "\"\<A\>\"", "|", "\"\<C\>\"", "|", "\"\<G\>\"", "|", 
+              "\"\<T\>\""}], ",", "#"}], "]"}]}], "&"}], "/@", 
+         RowBox[{"Range", "[", 
+          RowBox[{"10", ",", "1", ",", 
+           RowBox[{"-", "1"}]}], "]"}]}], ")"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"ptrn", "=", 
+       RowBox[{"Join", "[", 
+        RowBox[{"indelpatterns", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "\"\<A\>\"", "|", "\"\<C\>\"", "|", "\"\<G\>\"", "|", "\"\<T\>\""}],
+           "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
       RowBox[{"strcount", "=", 
        RowBox[{"StringCount", "[", 
-        RowBox[{"highcovmpileup", ",", "LetterCharacter", 
-         RowBox[{"(*", 
-          RowBox[{"{", 
-           RowBox[{
-            RowBox[{"\"\<+\>\"", "~~", 
-             RowBox[{"DigitCharacter", ".."}], "~~", 
-             RowBox[{"LetterCharacter", ".."}]}], ",", 
-            RowBox[{"\"\<-\>\"", "~~", 
-             RowBox[{"DigitCharacter", ".."}], "~~", 
-             RowBox[{"LetterCharacter", ".."}]}], ",", "LetterCharacter"}], 
-           "}"}], "*)"}], "\[IndentingNewLine]", 
-         RowBox[{"(*", " ", 
-          RowBox[{"Not", " ", "really", " ", "right"}], " ", "*)"}], ",", 
-         RowBox[{"Overlaps", "\[Rule]", "False"}]}], "]"}]}], ";", 
-      "\[IndentingNewLine]", 
-      RowBox[{"posabovethreshold", "=", 
+        RowBox[{"highcovmpileup", ",", "ptrn", ",", 
+         RowBox[{"Overlaps", "\[Rule]", "False"}], ",", 
+         RowBox[{"IgnoreCase", "\[Rule]", "True"}]}], "]"}]}], ";", 
+      "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      RowBox[{"(*", 
+       RowBox[{
+        RowBox[{"strcount", "=", 
+         RowBox[{"StringCount", "[", 
+          RowBox[{"highcovmpileup", ",", "LetterCharacter", 
+           RowBox[{"(*", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"\"\<+\>\"", "~~", 
+               RowBox[{"DigitCharacter", ".."}], "~~", 
+               RowBox[{"LetterCharacter", ".."}]}], ",", 
+              RowBox[{"\"\<-\>\"", "~~", 
+               RowBox[{"DigitCharacter", ".."}], "~~", 
+               RowBox[{"LetterCharacter", ".."}]}], ",", "LetterCharacter"}], 
+             "}"}], "*)"}], "\[IndentingNewLine]", 
+           RowBox[{"(*", " ", 
+            RowBox[{"Not", " ", "really", " ", "right"}], " ", "*)"}], ",", 
+           RowBox[{"Overlaps", "\[Rule]", "False"}]}], "]"}]}], ";"}], "*)"}],
+       "\[IndentingNewLine]", "\[IndentingNewLine]", 
+      RowBox[{"posaboveminimum", "=", 
        RowBox[{"Join", "@@", 
         RowBox[{"Position", "[", 
          RowBox[{
           RowBox[{"Sign", "[", 
-           RowBox[{
-            FractionBox[
-             RowBox[{"strcount", "//", "N"}], 
-             RowBox[{
-              RowBox[{"coverage", "[", 
-               RowBox[{"[", "highcovpos", "]"}], "]"}], "//", "N"}]], "-", 
-            "thr"}], "]"}], ",", "1", ",", 
+           RowBox[{"strcount", "-", 
+            RowBox[{"(", 
+             RowBox[{"nonrefmin", "-", "1"}], ")"}]}], "]"}], ",", "1", ",", 
           RowBox[{"{", "1", "}"}]}], "]"}]}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"posabovethreshold", "=", 
+       RowBox[{"posaboveminimum", "[", 
+        RowBox[{"[", 
+         RowBox[{"Join", "@@", 
+          RowBox[{"Position", "[", 
+           RowBox[{
+            RowBox[{"Sign", "[", 
+             RowBox[{
+              FractionBox[
+               RowBox[{
+                RowBox[{"strcount", "[", 
+                 RowBox[{"[", "posaboveminimum", "]"}], "]"}], "//", "N"}], 
+               RowBox[{
+                RowBox[{"coverage", "[", 
+                 RowBox[{"[", 
+                  RowBox[{"highcovpos", "[", 
+                   RowBox[{"[", "posaboveminimum", "]"}], "]"}], "]"}], "]"}],
+                 "//", "N"}]], "-", "thr"}], "]"}], ",", "1", ",", 
+            RowBox[{"{", "1", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
       "\[IndentingNewLine]", 
+      RowBox[{"(*", 
+       RowBox[{
+        RowBox[{"posabovethreshold", "=", 
+         RowBox[{"Join", "@@", 
+          RowBox[{"Position", "[", 
+           RowBox[{
+            RowBox[{"Sign", "[", 
+             RowBox[{
+              FractionBox[
+               RowBox[{"strcount", "//", "N"}], 
+               RowBox[{
+                RowBox[{"coverage", "[", 
+                 RowBox[{"[", "highcovpos", "]"}], "]"}], "//", "N"}]], "-", 
+              "thr"}], "]"}], ",", "1", ",", 
+            RowBox[{"{", "1", "}"}]}], "]"}]}]}], ";"}], "*)"}], 
+      "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{"(*", 
        RowBox[{
         RowBox[{"If", "[", 
@@ -7403,8 +7608,8 @@ modification: 8 May 2015.\>\""}], ";",
          RowBox[{
           RowBox[{"{", 
            RowBox[{
-           "varpos", ",", "varlength", ",", "sublength", ",", "maxscores"}], 
-           "}"}], "=", 
+           "varpos", ",", "varlength", ",", "sublength", ",", "maxratios", 
+            ",", "maxcounts"}], "}"}], "=", 
           RowBox[{"Transpose", "[", 
            RowBox[{
             RowBox[{
@@ -7436,7 +7641,11 @@ modification: 8 May 2015.\>\""}], ";",
                RowBox[{"Max", "[", 
                 RowBox[{"#", "[", 
                  RowBox[{"[", 
-                  RowBox[{"All", ",", "3"}], "]"}], "]"}], "]"}]}], "}"}], 
+                  RowBox[{"All", ",", "3"}], "]"}], "]"}], "]"}], ",", 
+               RowBox[{"Max", "[", 
+                RowBox[{"#", "[", 
+                 RowBox[{"[", 
+                  RowBox[{"All", ",", "4"}], "]"}], "]"}], "]"}]}], "}"}], 
              "&"}], "/@", 
             RowBox[{"GatherBy", "[", 
              RowBox[{
@@ -7453,18 +7662,20 @@ modification: 8 May 2015.\>\""}], ";",
                  RowBox[{
                   RowBox[{"(", 
                    RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{"nonrefcount", "=", 
                     RowBox[{"strcount", "[", 
-                    RowBox[{"[", "posabovethreshold", "]"}], "]"}], "//", 
-                    "N"}], ")"}], "/", 
+                    RowBox[{"[", "posabovethreshold", "]"}], "]"}]}], ")"}], "//",
+                     "N"}], ")"}], "/", 
                   RowBox[{"(", 
                    RowBox[{
                     RowBox[{"coverage", "[", 
                     RowBox[{"[", 
                     RowBox[{"highcovpos", "[", 
                     RowBox[{"[", "posabovethreshold", "]"}], "]"}], "]"}], 
-                    "]"}], "//", "N"}], ")"}]}]}], "}"}], "]"}], ",", 
-              "First"}], "]"}]}], "\[IndentingNewLine]", "]"}]}], ";", 
-         "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    "]"}], "//", "N"}], ")"}]}], ",", "nonrefcount"}], "}"}], 
+               "]"}], ",", "First"}], "]"}]}], "\[IndentingNewLine]", "]"}]}],
+          ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
          RowBox[{"result", "=", 
           RowBox[{
            RowBox[{"{", 
@@ -7480,8 +7691,8 @@ modification: 8 May 2015.\>\""}], ";",
                   RowBox[{"[", 
                    RowBox[{"varpos", ",", "2"}], "]"}], "]"}], "+", 
                  "varlength"}]}], "}"}], "]"}], ",", "sublength", ",", 
-             "maxscores"}], "}"}], "//", "Transpose"}]}], ";"}], 
-        "\[IndentingNewLine]", ",", "\[IndentingNewLine]", 
+             "maxratios", ",", "maxcounts"}], "}"}], "//", "Transpose"}]}], 
+         ";"}], "\[IndentingNewLine]", ",", "\[IndentingNewLine]", 
         RowBox[{"result", "=", 
          RowBox[{"{", "}"}]}]}], "\[IndentingNewLine]", "]"}], ";", 
       "\[IndentingNewLine]", "\[IndentingNewLine]", 
@@ -7511,14 +7722,16 @@ modification: 8 May 2015.\>\""}], ";",
       RowBox[{"Remove", "[", 
        RowBox[{
        "cov", ",", "thr", ",", "genomefasta", ",", "cmd", ",", "awkcmd", ",", 
-        "flbam", ",", "l", ",", "region", ",", "types", ",", "mpileup", ",", 
-        "coverage", ",", "highcovpos", ",", "highcovmpileup", ",", "strcount",
-         ",", "posabovethreshold", ",", "varpos", ",", 
+        "cutcmd", ",", "flbam", ",", "l", ",", "region", ",", "types", ",", 
+        "mpileup", ",", "coverage", ",", "highcovpos", ",", "highcovmpileup", 
+        ",", "strcount", ",", "posabovethreshold", ",", "varpos", ",", 
         "deletioninsertioncases", ",", "varlength", ",", "sublength", ",", 
         "un", ",", "selectpositions", ",", "multiregioncalculation", ",", 
-        "regionbedfile", ",", "maxscores", ",", "savecoverage", ",", "teecmd",
-         ",", "coveragefile", ",", "logs", ",", "tm"}], "]"}], ";", 
-      "\[IndentingNewLine]", "\[IndentingNewLine]", "result"}]}], 
+        "regionbedfile", ",", "maxratios", ",", "savecoverage", ",", "teecmd",
+         ",", "coveragefile", ",", "logs", ",", "tm", ",", "indelpatterns", 
+        ",", "ptrn", ",", "bamlistfile", ",", "nonrefmin", ",", 
+        "posaboveminimum", ",", "nonrefcount", ",", "maxcounts"}], "]"}], ";",
+       "\[IndentingNewLine]", "\[IndentingNewLine]", "result"}]}], 
     "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]"}], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.586259867946371*^9, 3.5862599301742373`*^9}, {
@@ -7591,7 +7804,29 @@ modification: 8 May 2015.\>\""}], ";",
    3.648911461326997*^9, 3.648911466796652*^9}, {3.64891160481004*^9, 
    3.648911623276133*^9}, {3.6489117194617233`*^9, 3.64891172037108*^9}, {
    3.668507557038978*^9, 3.6685076025035787`*^9}, {3.675496872837513*^9, 
-   3.6754968827830815`*^9}, {3.6754969312078514`*^9, 3.675496932491925*^9}}],
+   3.6754968827830815`*^9}, {3.6754969312078514`*^9, 3.675496932491925*^9}, {
+   3.6843515339141493`*^9, 3.684351605192816*^9}, 3.685953088354409*^9, {
+   3.68595347033504*^9, 3.68595347068793*^9}, {3.685955664206937*^9, 
+   3.685955664257626*^9}, {3.686164107047123*^9, 3.686164122335292*^9}, {
+   3.686164159368825*^9, 3.686164162236143*^9}, {3.686164195535968*^9, 
+   3.686164260809165*^9}, {3.686164291624888*^9, 3.686164327292211*^9}, {
+   3.6861644160398293`*^9, 3.6861644811549187`*^9}, {3.686164547621016*^9, 
+   3.6861645961308527`*^9}, {3.6861647671234617`*^9, 3.6861647752175083`*^9}, 
+   3.68616515365788*^9, {3.686165235839085*^9, 3.686165241687428*^9}, {
+   3.686165571368779*^9, 3.686165608604869*^9}, {3.686165657627246*^9, 
+   3.686165687401474*^9}, 3.686165725226568*^9, {3.686165976914744*^9, 
+   3.686165979849552*^9}, {3.68616622528441*^9, 3.6861662404264*^9}, {
+   3.6861663308909187`*^9, 3.6861663388118*^9}, {3.68616643048532*^9, 
+   3.6861664365681067`*^9}, {3.687265478249703*^9, 3.687265479372946*^9}, {
+   3.687265568604458*^9, 3.6872656184807673`*^9}, {3.687265690345332*^9, 
+   3.68726569118405*^9}, {3.687268570649905*^9, 3.687268675762714*^9}, 
+   3.6872717557953863`*^9, {3.687271855506959*^9, 3.687271945528222*^9}, {
+   3.687272902764093*^9, 3.68727290374964*^9}, 3.688721739209291*^9, {
+   3.6887218922269497`*^9, 3.688721897215798*^9}, {3.688721935214478*^9, 
+   3.68872204837885*^9}, {3.6887229127634897`*^9, 3.688722984349553*^9}, {
+   3.688723061160961*^9, 3.688723114278565*^9}, {3.688723339368586*^9, 
+   3.6887234092649384`*^9}, {3.688735254381466*^9, 3.688735356227265*^9}, {
+   3.6887356535589542`*^9, 3.6887357543694563`*^9}, 3.6889971815072412`*^9}],
 
 Cell[BoxData[{
  RowBox[{
@@ -8157,7 +8392,7 @@ right.\nLast modification: 5 Feb 2015.\>\""}], ";"}], "\[IndentingNewLine]",
    3.632118272046447*^9, 3.632118584595818*^9}, {3.635679550632977*^9, 
    3.6356795570664377`*^9}, {3.6460472700526667`*^9, 3.646047278599153*^9}, {
    3.675496993519415*^9, 3.675496994519472*^9}}]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -8222,12 +8457,12 @@ VCF file) detected.\>\""}], ";"}], "\[IndentingNewLine]",
       RowBox[{"optnstoreport", "=", 
        RowBox[{"{", 
         RowBox[{
-        "FastaFileName", ",", "ExtendTargetsBy", ",", 
-         "MinimalBaseSequencingScore", ",", "MinimalReadMappingScore", ",", 
-         "MinimalCoverage", ",", "SamtoolsFlagFilter", ",", 
-         "VariantThreshold", ",", "SaveCoverage", ",", "LogFileName", ",", 
-         "FailedLogFileName"}], "}"}]}], ";", "\[IndentingNewLine]", 
-      "\[IndentingNewLine]", 
+        "FastaFileName", ",", "ExtendTargetsBy", ",", "MinimalCoverage", ",", 
+         "MinimalRatioNonreferenceReads", ",", 
+         "MinimalNumberNonreferenceReads", ",", "MinimalBaseSequencingScore", 
+         ",", "MinimalReadMappingScore", ",", "SamtoolsFlagFilter", ",", 
+         "SaveCoverage", ",", "LogFileName", ",", "FailedLogFileName"}], 
+        "}"}]}], ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{"tm0", "=", 
        RowBox[{"DateList", "[", "]"}]}], ";", "\[IndentingNewLine]", 
       "\[IndentingNewLine]", 
@@ -8570,7 +8805,7 @@ target regions is \>\"", ",",
                 RowBox[{
                  RowBox[{"res", "[", 
                   RowBox[{"[", 
-                   RowBox[{"1", ",", "j"}], "]"}], "]"}], ",", 
+                   RowBox[{"1", ",", "jj"}], "]"}], "]"}], ",", 
                  RowBox[{"FilterRules", "[", 
                   RowBox[{
                    RowBox[{"{", "optns", "}"}], ",", 
@@ -8580,7 +8815,7 @@ target regions is \>\"", ",",
                     "ConvertVariantToVcfLine", ",", "Split2D", ",", 
                     "GenotypeReadCounts"}], "}"}]}]}], "]"}]}], "]"}], ",", 
                RowBox[{"{", 
-                RowBox[{"j", ",", "1", ",", 
+                RowBox[{"jj", ",", "1", ",", 
                  RowBox[{
                   RowBox[{"res", "[", 
                    RowBox[{"[", "1", "]"}], "]"}], "//", "Length"}]}], 
@@ -8825,7 +9060,9 @@ target regions is \>\"", ",",
    3.6506547978367887`*^9}, {3.6509786337577*^9, 3.650978634964176*^9}, {
    3.6745554685100317`*^9, 3.6745554896312137`*^9}, {3.6745555488207297`*^9, 
    3.6745556323138323`*^9}, 3.6745895738505254`*^9, 3.6745898188437915`*^9, {
-   3.675067215435671*^9, 3.6750672166927433`*^9}}],
+   3.675067215435671*^9, 3.6750672166927433`*^9}, {3.683655685448752*^9, 
+   3.683655688730557*^9}, 3.6872656914126053`*^9, {3.688743408610766*^9, 
+   3.6887434131004963`*^9}, {3.688743503464693*^9, 3.688743529214814*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -8890,7 +9127,8 @@ sum of AD\\\">\>\"", ",", "\[IndentingNewLine]",
       "\"\<##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\\\"Genotype \
 Quality - minimal nonzero PL\\\">\>\"", ",", "\[IndentingNewLine]", 
       "\"\<##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\\\"Phred \
-likelihoods for all possible genotypes\\\">\>\""}], "}"}]}]}], ";"}]], "Input",
+likelihoods for all possible genotypes\\\">\>\""}], "}"}]}]}], ";"}]], "Input",\
+
  InitializationCell->True,
  CellChangeTimes->CompressedData["
 1:eJwdzk0oAwAAxfHFjAsZ5TBT25KNtMPUcmC2YpZYmgMtZY0lO2CLqZmMppS2
@@ -8985,7 +9223,7 @@ Cell[BoxData[
   3.643628469150283*^9}, {3.64362866192344*^9, 3.643628705586244*^9}, {
   3.643628740990285*^9, 3.643628795422765*^9}, {3.64362906363809*^9, 
   3.643629292331645*^9}, {3.643629331504775*^9, 3.643629331543046*^9}}]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -10339,16 +10577,18 @@ Cell[BoxData[
 \[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
 ButtonData:>\\\"paclet:ref/message/End/noctx\\\", ButtonNote -> \
 \\\"End::noctx\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.673440377430326*^9}]
+ CellChangeTimes->{3.68873283755212*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"EndPackage", "[", "]"}]], "Input",
+ RowBox[{
+  RowBox[{"EndPackage", "[", "]"}], ";"}]], "Input",
  PageWidth->Infinity,
  Evaluatable->True,
- InitializationCell->True],
+ InitializationCell->True,
+ CellChangeTimes->{3.683657101733593*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -10359,23 +10599,19 @@ Cell[BoxData[
 \[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
 ButtonData:>\\\"paclet:ref/message/EndPackage/noctx\\\", ButtonNote -> \
 \\\"EndPackage::noctx\\\"]\\)\"\>"}]], "Message", "MSG",
- CellChangeTimes->{3.672398327752311*^9, 3.673440377461526*^9}],
-
-Cell[BoxData[
- RowBox[{"EndPackage", "[", "]"}]], "Output",
- CellChangeTimes->{3.672398327752311*^9, 3.673440377461526*^9}]
+ CellChangeTimes->{3.688732837607827*^9}]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
 },
-WindowSize->{1085, 592},
-WindowMargins->{{124, Automatic}, {-49, Automatic}},
+WindowSize->{1251, 800},
+WindowMargins->{{Automatic, 241}, {Automatic, 36}},
 PrintingCopies->1,
 PrintingPageRange->{32000, 32000},
 PrintingOptions->{"Magnification"->1.,
 "PaperOrientation"->"Portrait",
 "PaperSize"->{594.9599999999999, 842.04}},
-FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+FrontEndVersion->"9.0 for Linux x86 (64-bit) (February 7, 2013)",
 StyleDefinitions->"Default.nb"
 ]
 (* End of Notebook Content *)
@@ -10389,275 +10625,276 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 257, 7, 45, "Input",
+Cell[557, 20, 257, 7, 38, "Input",
  Evaluatable->True,
  InitializationCell->True],
-Cell[817, 29, 387, 7, 45, "Input",
+Cell[817, 29, 439, 8, 38, "Input",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[1229, 40, 72, 2, 130, "Section",
+Cell[1281, 41, 72, 2, 98, "Section",
  Evaluatable->False,
  InitializationCell->True],
-Cell[1304, 44, 1252, 31, 249, "Input",
+Cell[1356, 45, 1252, 31, 189, "Input",
  Evaluatable->True,
  InitializationCell->True]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2593, 80, 89, 2, 130, "Section",
+Cell[2645, 81, 89, 2, 98, "Section",
  Evaluatable->False],
-Cell[2685, 84, 236, 6, 45, "Input",
+Cell[2737, 85, 236, 6, 38, "Input",
  Evaluatable->True,
  InitializationCell->True],
-Cell[2924, 92, 297, 8, 45, "Input",
+Cell[2976, 93, 297, 8, 38, "Input",
  Evaluatable->True,
  InitializationCell->True],
-Cell[3224, 102, 151, 2, 45, "Input",
+Cell[3276, 103, 151, 2, 38, "Input",
  InitializationCell->True],
-Cell[3378, 106, 79, 1, 45, "Input",
+Cell[3430, 107, 79, 1, 38, "Input",
  InitializationCell->True],
-Cell[3460, 109, 77, 1, 45, "Input",
+Cell[3512, 110, 77, 1, 38, "Input",
  InitializationCell->True],
-Cell[3540, 112, 77, 1, 45, "Input",
+Cell[3592, 113, 77, 1, 38, "Input",
  InitializationCell->True],
-Cell[3620, 115, 73, 1, 45, "Input",
+Cell[3672, 116, 73, 1, 38, "Input",
  InitializationCell->True],
-Cell[3696, 118, 110, 2, 45, "Input",
+Cell[3748, 119, 110, 2, 38, "Input",
  InitializationCell->True],
-Cell[3809, 122, 71, 1, 45, "Input",
+Cell[3861, 123, 71, 1, 38, "Input",
  InitializationCell->True],
-Cell[3883, 125, 77, 1, 45, "Input",
+Cell[3935, 126, 77, 1, 38, "Input",
  InitializationCell->True],
-Cell[3963, 128, 70, 1, 45, "Input",
+Cell[4015, 129, 70, 1, 38, "Input",
  InitializationCell->True],
-Cell[4036, 131, 66, 1, 45, "Input",
+Cell[4088, 132, 66, 1, 38, "Input",
  InitializationCell->True],
-Cell[4105, 134, 131, 2, 45, "Input",
+Cell[4157, 135, 131, 2, 38, "Input",
  InitializationCell->True],
-Cell[4239, 138, 68, 1, 45, "Input",
+Cell[4291, 139, 68, 1, 38, "Input",
  InitializationCell->True],
-Cell[4310, 141, 132, 2, 45, "Input",
+Cell[4362, 142, 132, 2, 38, "Input",
  InitializationCell->True],
-Cell[4445, 145, 134, 2, 45, "Input",
+Cell[4497, 146, 134, 2, 38, "Input",
  InitializationCell->True],
-Cell[4582, 149, 144, 2, 45, "Input",
+Cell[4634, 150, 136, 2, 38, "Input",
  InitializationCell->True],
-Cell[4729, 153, 142, 2, 45, "Input",
+Cell[4773, 154, 149, 2, 38, "Input",
  InitializationCell->True],
-Cell[4874, 157, 136, 2, 45, "Input",
+Cell[4925, 158, 174, 3, 38, "Input",
  InitializationCell->True],
-Cell[5013, 161, 141, 2, 45, "Input",
+Cell[5102, 163, 144, 2, 38, "Input",
  InitializationCell->True],
-Cell[5157, 165, 135, 2, 45, "Input",
+Cell[5249, 167, 142, 2, 38, "Input",
  InitializationCell->True],
-Cell[5295, 169, 132, 2, 45, "Input",
+Cell[5394, 171, 141, 2, 38, "Input",
  InitializationCell->True],
-Cell[5430, 173, 136, 2, 45, "Input",
+Cell[5538, 175, 132, 2, 38, "Input",
  InitializationCell->True],
-Cell[5569, 177, 184, 3, 45, "Input",
+Cell[5673, 179, 136, 2, 38, "Input",
  InitializationCell->True],
-Cell[5756, 182, 297, 4, 45, "Input",
+Cell[5812, 183, 184, 3, 38, "Input",
  InitializationCell->True],
-Cell[6056, 188, 290, 4, 45, "Input",
+Cell[5999, 188, 297, 4, 38, "Input",
  InitializationCell->True],
-Cell[6349, 194, 183, 3, 45, "Input",
+Cell[6299, 194, 290, 4, 38, "Input",
  InitializationCell->True],
-Cell[6535, 199, 238, 4, 45, "Input",
+Cell[6592, 200, 183, 3, 38, "Input",
  InitializationCell->True],
-Cell[6776, 205, 294, 4, 45, "Input",
+Cell[6778, 205, 238, 4, 38, "Input",
  InitializationCell->True],
-Cell[7073, 211, 294, 4, 45, "Input",
+Cell[7019, 211, 294, 4, 38, "Input",
  InitializationCell->True],
-Cell[7370, 217, 243, 4, 45, "Input",
+Cell[7316, 217, 294, 4, 38, "Input",
+ InitializationCell->True],
+Cell[7613, 223, 243, 4, 38, "Input",
  InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[7650, 226, 118, 2, 83, "Section",
- InitializationCell->True],
-Cell[7771, 230, 119, 3, 45, "Input",
- InitializationCell->True],
-Cell[CellGroupData[{
-Cell[7915, 237, 180, 3, 72, "Subsection",
- InitializationCell->True],
-Cell[8098, 242, 3408, 78, 488, "Input",
- InitializationCell->True],
-Cell[11509, 322, 1759, 44, 347, "Input",
- InitializationCell->True],
-Cell[13271, 368, 2921, 59, 597, "Input",
- InitializationCell->True],
-Cell[16195, 429, 1494, 36, 307, "Input",
- InitializationCell->True],
-Cell[17692, 467, 963, 23, 249, "Input",
- InitializationCell->True],
-Cell[18658, 492, 925, 25, 133, "Input",
- InitializationCell->True],
-Cell[19586, 519, 1268, 33, 220, "Input",
- InitializationCell->True],
-Cell[20857, 554, 1596, 42, 249, "Input",
- InitializationCell->True],
-Cell[22456, 598, 3642, 79, 771, "Input",
- InitializationCell->True],
-Cell[26101, 679, 9358, 243, 1322, "Input",
- InitializationCell->True],
-Cell[35462, 924, 1738, 48, 249, "Input",
- InitializationCell->True],
-Cell[37203, 974, 1832, 49, 230, "Input",
- InitializationCell->True],
-Cell[39038, 1025, 10120, 227, 1618, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[49195, 1257, 184, 3, 58, "Subsection",
- InitializationCell->True],
-Cell[49382, 1262, 891, 22, 133, "Input",
- InitializationCell->True],
-Cell[50276, 1286, 3621, 94, 558, "Input",
- InitializationCell->True],
-Cell[53900, 1382, 6522, 149, 917, "Input",
- InitializationCell->True],
-Cell[60425, 1533, 9464, 218, 1554, "Input",
- InitializationCell->True],
-Cell[69892, 1753, 8559, 207, 1299, "Input",
- InitializationCell->True],
-Cell[78454, 1962, 12551, 276, 2221, "Input",
- InitializationCell->True],
-Cell[91008, 2240, 2434, 56, 394, "Input",
- InitializationCell->True],
-Cell[93445, 2298, 4755, 113, 935, "Input",
- InitializationCell->True],
-Cell[98203, 2413, 7273, 168, 945, "Input",
- InitializationCell->True],
-Cell[105479, 2583, 4917, 117, 568, "Input",
- InitializationCell->True],
-Cell[110399, 2702, 1476, 37, 191, "Input",
- InitializationCell->True],
-Cell[111878, 2741, 1939, 47, 336, "Input",
- InitializationCell->True],
-Cell[113820, 2790, 12061, 274, 2047, "Input",
- InitializationCell->True],
-Cell[125884, 3066, 8420, 199, 974, "Input",
- InitializationCell->True],
-Cell[134307, 3267, 3148, 77, 510, "Input",
- InitializationCell->True],
-Cell[137458, 3346, 2588, 57, 394, "Input",
- InitializationCell->True],
-Cell[140049, 3405, 4050, 100, 365, "Input",
- InitializationCell->True],
-Cell[144102, 3507, 867, 23, 75, "Input",
- InitializationCell->True],
-Cell[144972, 3532, 20955, 448, 3505, "Input",
- InitializationCell->True],
-Cell[165930, 3982, 2007, 57, 278, "Input",
- InitializationCell->True],
-Cell[167940, 4041, 7464, 174, 1177, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[175441, 4220, 142, 2, 58, "Subsection",
- InitializationCell->True],
-Cell[175586, 4224, 651, 16, 133, "Input",
- InitializationCell->True],
-Cell[176240, 4242, 9395, 186, 974, "Input",
- InitializationCell->True],
-Cell[185638, 4430, 8323, 186, 1323, "Input",
- InitializationCell->True],
-Cell[193964, 4618, 4184, 104, 626, "Input",
- InitializationCell->True],
-Cell[198151, 4724, 2022, 55, 336, "Input",
- InitializationCell->True],
-Cell[200176, 4781, 39372, 822, 5150, "Input",
- InitializationCell->True],
-Cell[239551, 5605, 123, 2, 45, "Input",
- InitializationCell->True],
-Cell[239677, 5609, 4673, 113, 713, "Input",
- InitializationCell->True],
-Cell[244353, 5724, 696, 20, 75, "Input",
- InitializationCell->True],
-Cell[245052, 5746, 900, 22, 133, "Input",
- InitializationCell->True],
-Cell[245955, 5770, 3715, 91, 684, "Input",
- InitializationCell->True],
-Cell[249673, 5863, 8495, 201, 1061, "Input",
- InitializationCell->True],
-Cell[258171, 6066, 1061, 29, 133, "Input",
- InitializationCell->True],
-Cell[259235, 6097, 5010, 120, 626, "Input",
- InitializationCell->True],
-Cell[264248, 6219, 6749, 167, 1061, "Input",
- InitializationCell->True],
-Cell[271000, 6388, 23375, 486, 3062, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[294412, 6879, 179, 3, 58, "Subsection",
- InitializationCell->True],
-Cell[294594, 6884, 33701, 709, 6086, "Input",
- InitializationCell->True],
-Cell[328298, 7595, 9968, 203, 2279, "Input",
- InitializationCell->True],
-Cell[338269, 7800, 2028, 57, 394, "Input",
- InitializationCell->True],
-Cell[340300, 7859, 14530, 299, 2424, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[354867, 8163, 272, 4, 58, "Subsection",
- InitializationCell->True],
-Cell[355142, 8169, 33266, 658, 5817, "Input",
- InitializationCell->True],
-Cell[388411, 8829, 3842, 74, 1061, "Input",
- InitializationCell->True],
-Cell[392256, 8905, 3110, 81, 510, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[395403, 8991, 360, 5, 58, "Subsection",
- InitializationCell->True],
-Cell[395766, 8998, 4559, 113, 888, "Input",
- InitializationCell->True],
-Cell[400328, 9113, 1703, 41, 365, "Input",
- InitializationCell->True],
-Cell[402034, 9156, 2911, 64, 597, "Input",
- InitializationCell->True],
-Cell[404948, 9222, 3050, 66, 568, "Input",
- InitializationCell->True],
-Cell[408001, 9290, 18148, 390, 2290, "Input",
- InitializationCell->True],
-Cell[426152, 9682, 3515, 86, 684, "Input",
- InitializationCell->True],
-Cell[429670, 9770, 1786, 50, 220, "Input",
- InitializationCell->True],
-Cell[431459, 9822, 10127, 237, 1324, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[441623, 10064, 399, 6, 58, "Subsection",
- InitializationCell->True],
-Cell[442025, 10072, 2577, 56, 307, "Input",
- InitializationCell->True],
-Cell[444605, 10130, 3910, 90, 510, "Input",
- InitializationCell->True],
-Cell[448518, 10222, 2554, 63, 394, "Input",
- InitializationCell->True]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[451109, 10290, 350, 5, 58, "Subsection",
- InitializationCell->True],
-Cell[451462, 10297, 178, 4, 45, "Input",
- InitializationCell->True],
-Cell[451643, 10303, 815, 19, 104, "Input",
- InitializationCell->True],
-Cell[CellGroupData[{
-Cell[452483, 10326, 116, 4, 45, "Input",
- Evaluatable->True,
- InitializationCell->True],
-Cell[452602, 10332, 399, 9, 35, "Message"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[453038, 10346, 127, 4, 45, "Input",
+Cell[7893, 232, 118, 2, 98, "Section",
+ InitializationCell->True],
+Cell[8014, 236, 119, 3, 38, "Input",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[8158, 243, 180, 3, 54, "Subsection",
+ InitializationCell->True],
+Cell[8341, 248, 3408, 78, 396, "Input",
+ InitializationCell->True],
+Cell[11752, 328, 1759, 44, 302, "Input",
+ InitializationCell->True],
+Cell[13514, 374, 2921, 59, 517, "Input",
+ InitializationCell->True],
+Cell[16438, 435, 1494, 36, 298, "Input",
+ InitializationCell->True],
+Cell[17935, 473, 970, 25, 142, "Input",
+ InitializationCell->True],
+Cell[18908, 500, 4823, 102, 736, "Input",
+ InitializationCell->True],
+Cell[23734, 604, 1268, 33, 236, "Input",
+ InitializationCell->True],
+Cell[25005, 639, 1596, 42, 267, "Input",
+ InitializationCell->True],
+Cell[26604, 683, 3642, 79, 798, "Input",
+ InitializationCell->True],
+Cell[30249, 764, 9358, 243, 1267, "Input",
+ InitializationCell->True],
+Cell[39610, 1009, 1738, 48, 205, "Input",
+ InitializationCell->True],
+Cell[41351, 1059, 1832, 49, 256, "Input",
+ InitializationCell->True],
+Cell[43186, 1110, 10120, 227, 1566, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[53343, 1342, 184, 3, 53, "Subsection",
+ InitializationCell->True],
+Cell[53530, 1347, 891, 22, 177, "Input",
+ InitializationCell->True],
+Cell[54424, 1371, 3621, 94, 585, "Input",
+ InitializationCell->True],
+Cell[58048, 1467, 6522, 149, 1178, "Input",
+ InitializationCell->True],
+Cell[64573, 1618, 9643, 222, 1155, "Input",
+ InitializationCell->True],
+Cell[74219, 1842, 8559, 207, 1029, "Input",
+ InitializationCell->True],
+Cell[82781, 2051, 12551, 276, 1739, "Input",
+ InitializationCell->True],
+Cell[95335, 2329, 2434, 56, 314, "Input",
+ InitializationCell->True],
+Cell[97772, 2387, 4755, 113, 755, "Input",
+ InitializationCell->True],
+Cell[102530, 2502, 7273, 168, 1232, "Input",
+ InitializationCell->True],
+Cell[109806, 2672, 4917, 117, 763, "Input",
+ InitializationCell->True],
+Cell[114726, 2791, 1476, 37, 216, "Input",
+ InitializationCell->True],
+Cell[116205, 2830, 1939, 47, 451, "Input",
+ InitializationCell->True],
+Cell[118147, 2879, 12061, 274, 2560, "Input",
+ InitializationCell->True],
+Cell[130211, 3155, 8420, 199, 1193, "Input",
+ InitializationCell->True],
+Cell[138634, 3356, 3148, 77, 607, "Input",
+ InitializationCell->True],
+Cell[141785, 3435, 2588, 57, 451, "Input",
+ InitializationCell->True],
+Cell[144376, 3494, 4050, 100, 451, "Input",
+ InitializationCell->True],
+Cell[148429, 3596, 867, 23, 100, "Input",
+ InitializationCell->True],
+Cell[149299, 3621, 20955, 448, 4503, "Input",
+ InitializationCell->True],
+Cell[170257, 4071, 2007, 57, 256, "Input",
+ InitializationCell->True],
+Cell[172267, 4130, 7464, 174, 1353, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[179768, 4309, 142, 2, 53, "Subsection",
+ InitializationCell->True],
+Cell[179913, 4313, 651, 16, 142, "Input",
+ InitializationCell->True],
+Cell[180567, 4331, 9395, 186, 955, "Input",
+ InitializationCell->True],
+Cell[189965, 4519, 8323, 186, 1173, "Input",
+ InitializationCell->True],
+Cell[198291, 4707, 4184, 104, 548, "Input",
+ InitializationCell->True],
+Cell[202478, 4813, 2022, 55, 361, "Input",
+ InitializationCell->True],
+Cell[204503, 4870, 39372, 822, 4861, "Input",
+ InitializationCell->True],
+Cell[243878, 5694, 123, 2, 47, "Input",
+ InitializationCell->True],
+Cell[244004, 5698, 4673, 113, 705, "Input",
+ InitializationCell->True],
+Cell[248680, 5813, 696, 20, 80, "Input",
+ InitializationCell->True],
+Cell[249379, 5835, 900, 22, 80, "Input",
+ InitializationCell->True],
+Cell[250282, 5859, 3715, 91, 705, "Input",
+ InitializationCell->True],
+Cell[254000, 5952, 8495, 201, 955, "Input",
+ InitializationCell->True],
+Cell[262498, 6155, 1061, 29, 111, "Input",
+ InitializationCell->True],
+Cell[263562, 6186, 5010, 120, 642, "Input",
+ InitializationCell->True],
+Cell[268575, 6308, 6749, 167, 839, "Input",
+ InitializationCell->True],
+Cell[275327, 6477, 23375, 486, 2314, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[298739, 6968, 179, 3, 54, "Subsection",
+ InitializationCell->True],
+Cell[298921, 6973, 41121, 855, 5547, "Input",
+ InitializationCell->True],
+Cell[340045, 7830, 9968, 203, 1539, "Input",
+ InitializationCell->True],
+Cell[350016, 8035, 2028, 57, 267, "Input",
+ InitializationCell->True],
+Cell[352047, 8094, 14530, 299, 2236, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[366614, 8398, 272, 4, 53, "Subsection",
+ InitializationCell->True],
+Cell[366889, 8404, 33494, 660, 5173, "Input",
+ InitializationCell->True],
+Cell[400386, 9066, 3844, 75, 986, "Input",
+ InitializationCell->True],
+Cell[404233, 9143, 3110, 81, 392, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[407380, 9229, 360, 5, 67, "Subsection",
+ InitializationCell->True],
+Cell[407743, 9236, 4559, 113, 748, "Input",
+ InitializationCell->True],
+Cell[412305, 9351, 1703, 41, 361, "Input",
+ InitializationCell->True],
+Cell[414011, 9394, 2911, 64, 725, "Input",
+ InitializationCell->True],
+Cell[416925, 9460, 3050, 66, 685, "Input",
+ InitializationCell->True],
+Cell[419978, 9528, 18148, 390, 2666, "Input",
+ InitializationCell->True],
+Cell[438129, 9920, 3515, 86, 802, "Input",
+ InitializationCell->True],
+Cell[441647, 10008, 1786, 50, 216, "Input",
+ InitializationCell->True],
+Cell[443436, 10060, 10127, 237, 1583, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[453600, 10302, 399, 6, 53, "Subsection",
+ InitializationCell->True],
+Cell[454002, 10310, 2577, 56, 267, "Input",
+ InitializationCell->True],
+Cell[456582, 10368, 3910, 90, 455, "Input",
+ InitializationCell->True],
+Cell[460495, 10460, 2554, 63, 361, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[463086, 10528, 350, 5, 53, "Subsection",
+ InitializationCell->True],
+Cell[463439, 10535, 178, 4, 47, "Input",
+ InitializationCell->True],
+Cell[463620, 10541, 815, 19, 80, "Input",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[464460, 10564, 116, 4, 47, "Input",
  Evaluatable->True,
  InitializationCell->True],
-Cell[453168, 10352, 442, 9, 35, "Message"],
-Cell[453613, 10363, 123, 2, 44, "Output"]
+Cell[464579, 10570, 398, 9, 87, "Message"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[465014, 10584, 187, 6, 47, "Input",
+ Evaluatable->True,
+ InitializationCell->True],
+Cell[465204, 10592, 420, 9, 87, "Message"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
@@ -10665,4 +10902,3 @@ Cell[453613, 10363, 123, 2, 44, "Output"]
 ]
 *)
 
-(* End of internal cache information *)
