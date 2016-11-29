@@ -655,7 +655,7 @@ Assign the genotypes to each cluster based on the closest allele vector
 *)
 closest=ClosestVectors[bbf[[2]]];
 clustn=Prepend[closest[[2]],0][[bbf[[1]]+1]];
-genotypes=AlleleCombinations[ll[[1]]][[clustn+1]];
+genotypes=AlleleCombinations[ll[[2]]][[clustn+1]];
 p=closest[[1]];
 
 (*
