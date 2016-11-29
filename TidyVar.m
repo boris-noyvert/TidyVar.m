@@ -25,8 +25,8 @@ BeginPackage["TidyVar`"];
 $TidyVarVersion="0.2.2";
 
 
-Print["TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016."];
-If[$OperatingSystem==="Windows",Print["Sorry, TidyVar doesn't work under Windows operating system, please try it on Linux or MacOS."](*;Abort[]*)];
+WriteString["stdout","TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016.\n"];
+If[$OperatingSystem==="Windows",WriteString["stdout","Sorry, TidyVar doesn't work under Windows operating system, please try it on Linux or MacOS.\n"](*;Abort[]*)];
 
 
 CallVariants
@@ -273,7 +273,9 @@ Map[xx[[#]]&,Transpose[{ps[[1;;-2]]+1,ps[[2;;-1]]}],{2}]
 
 PrintError::usage="Prints its arguments using a colour specified (Darker[Red] by default).";
 Options[PrintError]={Colour->Darker[Red]};
-PrintError[x_String,OptionsPattern[PrintError]]:=Print[Style[x,OptionValue[Colour]]];
+PrintError[x_String,OptionsPattern[PrintError]]:=If[$Notebooks,
+Print[Style[x,OptionValue[Colour]]],
+WriteString["stderr",x,"\n"]];
 PrintError[x_List,op:OptionsPattern[PrintError]]:=PrintError[StringJoinWith[ToString/@Flatten[x]],op];
 PrintError[x__,op:OptionsPattern[PrintError]]:=PrintError[{x},op];
 
@@ -1883,11 +1885,11 @@ And@@StringFreeQ[check,{"failed","indexed"},IgnoreCase->True]
 CheckBamFiles[bamfiles_]:=Module[{flbam,l},
 Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,PrintError["The bam files are ill-defined"];Return[False]];
 l=Length[flbam];
-Print["Found ",l," bam files."];
-If[l===0,Return[False]];
+WriteString["stdout","Found ",l," bam files.\n"];
+If[l===0,PrintError["The bam files are ill-defined.\nAborting!"];Abort[]];
 If[l>5,
-(Print["Checking the indexes of 5 random bam files."];Return[And@@(CheckBamIsIndexed/@RandomSample[flbam,5])]),
-(Print["Checking the indexes of bam files."];Return[And@@(CheckBamIsIndexed/@flbam)])]
+(WriteString["stdout","Checking the indexes of 5 random bam files.\n"];Return[And@@(CheckBamIsIndexed/@RandomSample[flbam,5])]),
+(WriteString["stdout","Checking the indexes of bam files.\n"];Return[And@@(CheckBamIsIndexed/@flbam)])]
 ]
 
 
