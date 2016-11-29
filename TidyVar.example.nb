@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     12443,        301]
-NotebookOptionsPosition[     11123,        252]
-NotebookOutlinePosition[     11488,        268]
-CellTagsIndexPosition[     11445,        265]
+NotebookDataLength[     16739,        436]
+NotebookOptionsPosition[     14730,        361]
+NotebookOutlinePosition[     15088,        377]
+CellTagsIndexPosition[     15045,        374]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -24,6 +24,8 @@ Cell["Load the TidyVar package", "Subsection",
  CellChangeTimes->{{3.6461196722870913`*^9, 3.646119699996868*^9}, {
   3.646143027017371*^9, 3.6461430341014137`*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{"Get", "[", 
   RowBox[{"(", 
@@ -31,7 +33,23 @@ Cell[BoxData[
     RowBox[{"NotebookDirectory", "[", "]"}], "<>", "\"\<TidyVar.m\>\""}], 
    ")"}], "]"}]], "Input",
  CellChangeTimes->{{3.646051091512019*^9, 3.646051104346034*^9}, {
-  3.646051163770705*^9, 3.646051166346311*^9}}]
+   3.646051163770705*^9, 3.646051166346311*^9}, {3.6890102121231833`*^9, 
+   3.689010212505775*^9}, 3.6890103748372097`*^9}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"TidyVar package for calling genomic variants from Next \
+Generation Sequencing data.\\nVersion \"\>", 
+   "\[InvisibleSpace]", "\<\"0.2.2\"\>", 
+   "\[InvisibleSpace]", "\<\"\\nBoris Noyvert, Greg Elgar lab, \
+2014-2016.\"\>"}],
+  SequenceForm[
+  "TidyVar package for calling genomic variants from Next Generation \
+Sequencing data.\nVersion ", "0.2.2", 
+   "\nBoris Noyvert, Greg Elgar lab, 2014-2016."],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.6890134323243847`*^9}]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -39,8 +57,21 @@ Cell[CellGroupData[{
 Cell["Check that samtools is installed", "Subsection",
  CellChangeTimes->{{3.6461196722870913`*^9, 3.646119699996868*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{"CheckSamtoolsIsInstalled", "[", "SamtoolsPath", "]"}]], "Input"],
+
+Cell["\<\
+samtools 1.3.1
+Using htslib 1.3.1
+Copyright (C) 2016 Genome Research Ltd.\
+\>", "Print",
+ CellChangeTimes->{3.6890134324863663`*^9}],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.689013432534042*^9}]
+}, Open  ]],
 
 Cell["\<\
 IF Samtools is not found, you may need to install Samtools or (if you believe \
@@ -59,6 +90,14 @@ Cell["Specify genome fasta file", "Subsection",
   3.646120759775914*^9, 3.646120774083509*^9}, {3.646120901239711*^9, 
   3.6461209052518587`*^9}}],
 
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"testdir", "=", 
+   RowBox[{
+    RowBox[{"NotebookDirectory", "[", "]"}], "<>", "\"\<test/\>\""}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.689010529878496*^9, 3.6890105307628736`*^9}}],
+
 Cell["\<\
 It should be the same file that was used in mapping reads to the genome! \
 Modify the file name below, it should include the full path.\
@@ -67,26 +106,37 @@ Modify the file name below, it should include the full path.\
   3.6507340512271905`*^9, 3.650734109743121*^9}, {3.650735416103508*^9, 
   3.6507354165910697`*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[{
  RowBox[{
+  RowBox[{"GenomeFastaFile", "=", 
+   RowBox[{"testdir", "<>", "\"\<genome.fa\>\""}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
   RowBox[{
-   RowBox[{
-   "GenomeFastaFile", "=", 
-    "\"\</home/boris/GenomesFastaAndIndexes/FastaGenomes/human_g1k_v37.fasta\>\
-\""}], ";"}], "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+   RowBox[{"Print", "[", "GenomeFastaFile", "]"}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
  RowBox[{"CheckFileExistence", "[", "GenomeFastaFile", "]"}]}], "Input",
  CellChangeTimes->{{3.6461208118074417`*^9, 3.646120818406402*^9}, 
    3.6461208603553133`*^9, {3.646124516989491*^9, 3.646124521049613*^9}, {
    3.6483643071367617`*^9, 3.648364342608836*^9}, 3.650734001554883*^9, {
    3.650734032181772*^9, 3.650734038968134*^9}, {3.6507355350716147`*^9, 
-   3.6507355352156334`*^9}}]
+   3.6507355352156334`*^9}, 3.683314192822625*^9, {3.6890103391254377`*^9, 
+   3.689010354985387*^9}, {3.68901045070131*^9, 3.6890105190798388`*^9}}],
+
+Cell[BoxData["\<\"/home/boris/pc/TidyVar.m-master/test/genome.fa\"\>"], \
+"Print",
+ CellChangeTimes->{3.689013432672134*^9}],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.6890134327023783`*^9}]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["\<\
-Specify bam files and check if they are indexed\
-\>", "Subsection",
+Cell["Specify bam files and check if they are indexed", "Subsection",
  CellChangeTimes->{{3.6461196722870913`*^9, 3.646119699996868*^9}, {
   3.646120759775914*^9, 3.646120774083509*^9}, {3.646120901239711*^9, 
   3.6461209052518587`*^9}, {3.646121190206966*^9, 3.646121191813368*^9}, {
@@ -108,22 +158,51 @@ in the example below:"
   3.650734380405491*^9}, {3.650734414035762*^9, 3.6507344664404163`*^9}, {
   3.6507353947057905`*^9, 3.650735404131488*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[{
  RowBox[{
-  RowBox[{"bamfiles", "=", "\"\</home/boris/mapping/*.bam\>\""}], ";"}], "\n", 
+  RowBox[{"bamfiles", "=", 
+   RowBox[{"testdir", "<>", "\"\<*.bam\>\""}]}], ";"}], "\n", 
  RowBox[{"CheckBamFiles", "[", "bamfiles", "]"}]}], "Input",
  CellChangeTimes->{{3.646121214595931*^9, 3.646121221208905*^9}, {
    3.6461212643793077`*^9, 3.646121283032797*^9}, 3.646128351076199*^9, {
    3.64836435360783*^9, 3.6483643548206*^9}, {3.648364392407201*^9, 
    3.64836440047816*^9}, {3.650734396515537*^9, 3.6507344042160144`*^9}, {
-   3.650735564492851*^9, 3.6507355650714245`*^9}}]
+   3.650735564492851*^9, 3.6507355650714245`*^9}, 3.683314282631187*^9, 
+   3.683638437162038*^9, {3.6890105397336273`*^9, 3.689010544766542*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Found \"\>", "\[InvisibleSpace]", "20", 
+   "\[InvisibleSpace]", "\<\" bam files.\"\>"}],
+  SequenceForm["Found ", 20, " bam files."],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.6890134327400703`*^9}],
+
+Cell[BoxData["\<\"Checking the indexes of 5 random bam files.\"\>"], "Print",
+ CellChangeTimes->{3.689013432741387*^9}],
+
+Cell["\<\
+/home/boris/pc/TidyVar.m-master/test/sample10.bam
+/home/boris/pc/TidyVar.m-master/test/sample04.bam
+/home/boris/pc/TidyVar.m-master/test/sample05.bam
+/home/boris/pc/TidyVar.m-master/test/sample15.bam
+/home/boris/pc/TidyVar.m-master/test/sample16.bam\
+\>", "Print",
+ CellChangeTimes->{3.689013432747325*^9}]
+}, Open  ]],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.689013432797243*^9}]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
-Cell["\<\
-Specify target bed file and/or region for variant calling\
-\>", "Subsection",
+Cell["Specify target bed file and/or region for variant calling", "Subsection",
  CellChangeTimes->{{3.6461196722870913`*^9, 3.646119699996868*^9}, {
   3.646120759775914*^9, 3.646120774083509*^9}, {3.646120901239711*^9, 
   3.6461209052518587`*^9}, {3.646121190206966*^9, 3.646121191813368*^9}, {
@@ -135,48 +214,61 @@ If your data is from targeted enrichment capture (like exome sequencing) then \
 please specify the name of a file in bed format that contains the target \
 genomic coordinates. You may specify an empty string \[OpenCurlyDoubleQuote]\
 \[CloseCurlyDoubleQuote] if this is a whole genome sequencing data or you are \
-interested in a particular region defined in the targetregion variable.\
+interested in a particular region defined in the targetregion variable below.\
+\
 \>", "Text",
  CellChangeTimes->{{3.650733795275689*^9, 3.6507339899459085`*^9}, {
   3.6507340512271905`*^9, 3.650734109743121*^9}, {3.6507341795819893`*^9, 
   3.650734380405491*^9}, {3.650734414035762*^9, 3.6507344664404163`*^9}, {
   3.650734638336244*^9, 3.650734817737525*^9}, {3.6507348527569723`*^9, 
   3.6507349655472946`*^9}, {3.6507351701442747`*^9, 3.650735170786357*^9}, {
-  3.6507355104809923`*^9, 3.6507355203412447`*^9}}],
+  3.6507355104809923`*^9, 3.6507355203412447`*^9}, {3.6890130713148623`*^9, 
+  3.689013072370523*^9}}],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[{
  RowBox[{
-  RowBox[{"targetbedfile", "=", "\"\</home/boris/targets/targets.bed\>\""}], 
+  RowBox[{"targetbedfile", "=", 
+   RowBox[{"testdir", "<>", "\"\<targets.bed\>\""}]}], 
   ";"}], "\[IndentingNewLine]", 
  RowBox[{"CheckFileExistence", "[", "targetbedfile", "]"}]}], "Input",
  CellChangeTimes->{{3.650734978811979*^9, 3.6507350324077845`*^9}, {
-  3.6507355491268997`*^9, 3.650735576622391*^9}}],
+  3.6507355491268997`*^9, 3.650735576622391*^9}, {3.6833143570695333`*^9, 
+  3.6833143784967613`*^9}, {3.6890130834545317`*^9, 3.689013095763031*^9}, {
+  3.689013150247527*^9, 3.689013153644862*^9}}],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.689013432806818*^9}]
+}, Open  ]],
 
 Cell["\<\
 If you targeted a continuous genomic region or you want to run TidyVar on a \
 specific region only you may specify the region below. You can use an empty \
-string if there is no to specify. One can define both the target bed file and \
-the target region - an overlap of the region and the targets in the bed file \
-will be evaluated in this case. Make sure that you use the same chromosome \
-label conventions as in your fasta and bam files!\
+string if there is no region to specify. One can define both the target bed \
+file and the target region - an overlap of the region and the targets in the \
+bed file will be evaluated in this case. Make sure that you use the same \
+chromosome label conventions as in your fasta and bam files!\
 \>", "Text",
  CellChangeTimes->{{3.650733795275689*^9, 3.6507339899459085`*^9}, {
   3.6507340512271905`*^9, 3.650734109743121*^9}, {3.6507341795819893`*^9, 
   3.650734380405491*^9}, {3.650734414035762*^9, 3.6507344664404163`*^9}, {
   3.650734638336244*^9, 3.650734817737525*^9}, {3.6507348527569723`*^9, 
   3.6507349655472946`*^9}, {3.650735049163412*^9, 3.650735293932994*^9}, {
-  3.650735344702941*^9, 3.6507353855761313`*^9}}],
+  3.650735344702941*^9, 3.6507353855761313`*^9}, {3.689013129029566*^9, 
+  3.6890131348777637`*^9}}],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"targetregion", "=", "\"\<14:10000000-11000000\>\""}], 
-  ";"}]], "Input",
+  RowBox[{"targetregion", "=", "\"\<\>\""}], ";"}]], "Input",
  CellChangeTimes->{{3.6461285998494253`*^9, 3.646128608954562*^9}, {
    3.646128640612678*^9, 3.646128647309402*^9}, {3.646132261404805*^9, 
    3.646132275764455*^9}, {3.646143298421351*^9, 3.646143327151861*^9}, {
    3.6481368559760323`*^9, 3.648136856744629*^9}, {3.648136896438937*^9, 
    3.648136921795577*^9}, 3.650008845651258*^9, {3.6507352998017397`*^9, 
-   3.650735334991208*^9}, {3.6507359757925797`*^9, 3.650735980591189*^9}}]
+   3.650735334991208*^9}, {3.6507359757925797`*^9, 3.650735980591189*^9}, {
+   3.683314493768111*^9, 3.683314526199955*^9}, 3.683654580128878*^9, 
+   3.689013172914452*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -205,11 +297,16 @@ details.\
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"outputvcffile", "=", "\"\</home/boris/vcf/variants.vcf\>\""}], 
-  ";"}]], "Input",
+  RowBox[{"outputvcffile", "=", 
+   RowBox[{"testdir", "<>", "\"\<variants.vcf\>\""}]}], ";"}]], "Input",
  CellChangeTimes->{{3.6461244033837557`*^9, 3.646124475645712*^9}, {
-  3.6481367687671556`*^9, 3.648136789490522*^9}, {3.648364444069645*^9, 
-  3.648364463424818*^9}, {3.650735592548914*^9, 3.6507356029812384`*^9}}]
+   3.6481367687671556`*^9, 3.648136789490522*^9}, {3.648364444069645*^9, 
+   3.648364463424818*^9}, {3.650735592548914*^9, 3.6507356029812384`*^9}, {
+   3.6833144091527863`*^9, 3.68331443287466*^9}, 3.6836384527787724`*^9, {
+   3.6836546056959867`*^9, 3.683654606255546*^9}, {3.683710642926277*^9, 
+   3.6837106459728203`*^9}, {3.6837447592849216`*^9, 3.683744759907811*^9}, {
+   3.683915920611453*^9, 3.683915970436075*^9}, {3.6890106332218523`*^9, 
+   3.689010654282785*^9}}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -235,25 +332,37 @@ which can be found in the same directory as the output vcf file.\
   3.6507354861459017`*^9}, {3.650735646026204*^9, 3.650735672435058*^9}, {
   3.650735713941328*^9, 3.6507359094941607`*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
   RowBox[{"CallVariants", "[", 
    RowBox[{
    "bamfiles", ",", "outputvcffile", ",", "targetbedfile", ",", 
-    "targetregion"}], "]"}], "//", "AbsoluteTiming"}]], "Input",
+    "targetregion", ",", 
+    RowBox[{"ExtendTargetsBy", "\[Rule]", "100"}]}], "]"}], "//", 
+  "AbsoluteTiming"}]], "Input",
  CellChangeTimes->{{3.649084827655508*^9, 3.6490848534290524`*^9}, {
   3.649084938678034*^9, 3.649084941165049*^9}, {3.64908572584196*^9, 
   3.649085726029986*^9}, {3.649085910610042*^9, 3.6490859497040863`*^9}, {
   3.6490860195178757`*^9, 3.649086039912643*^9}, {3.6490864778960943`*^9, 
   3.6490864785898857`*^9}, {3.649086517705144*^9, 3.649086518030452*^9}, {
   3.649171262454321*^9, 3.649171263409563*^9}, {3.6507357004776187`*^9, 
-  3.6507357077385406`*^9}}]
+  3.6507357077385406`*^9}, {3.689013249171998*^9, 3.6890132649182796`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "3.41317499999999984794385454733856022358`6.553758469236531", ",", "51"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.689013436273635*^9}]
+}, Open  ]]
 }, Open  ]]
 },
 WindowSize->{1219, 723},
-WindowMargins->{{Automatic, 56}, {Automatic, 0}},
+WindowMargins->{{Automatic, 301}, {Automatic, 0}},
 ShowSelection->True,
-FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+FrontEndVersion->"9.0 for Linux x86 (64-bit) (February 7, 2013)",
 StyleDefinitions->"Default.nb"
 ]
 (* End of Notebook Content *)
@@ -268,43 +377,68 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[579, 22, 165, 2, 72, "Subsection"],
-Cell[747, 26, 280, 7, 45, "Input"]
+Cell[579, 22, 165, 2, 54, "Subsection"],
+Cell[CellGroupData[{
+Cell[769, 28, 357, 8, 38, "Input"],
+Cell[1129, 38, 528, 12, 75, "Print"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1064, 38, 122, 1, 72, "Subsection"],
-Cell[1189, 41, 88, 1, 45, "Input"],
-Cell[1280, 44, 367, 7, 102, "Text"]
+Cell[1706, 56, 122, 1, 54, "Subsection"],
+Cell[CellGroupData[{
+Cell[1853, 61, 88, 1, 38, "Input"],
+Cell[1944, 64, 142, 5, 67, "Print"],
+Cell[2089, 71, 73, 1, 38, "Output"]
+}, Open  ]],
+Cell[2177, 75, 367, 7, 87, "Text"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1684, 56, 215, 3, 72, "Subsection"],
-Cell[1902, 61, 329, 6, 74, "Text"],
-Cell[2234, 69, 611, 12, 104, "Input"]
+Cell[2581, 87, 215, 3, 54, "Subsection"],
+Cell[2799, 92, 222, 6, 38, "Input"],
+Cell[3024, 100, 329, 6, 61, "Text"],
+Cell[CellGroupData[{
+Cell[3378, 110, 791, 15, 114, "Input"],
+Cell[4172, 127, 124, 2, 28, "Print"],
+Cell[4299, 131, 75, 1, 38, "Output"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2882, 86, 340, 6, 72, "Subsection"],
-Cell[3225, 94, 763, 14, 102, "Text"],
-Cell[3991, 110, 501, 8, 75, "Input"]
+Cell[4423, 138, 332, 4, 54, "Subsection"],
+Cell[4758, 144, 763, 14, 88, "Text"],
+Cell[CellGroupData[{
+Cell[5546, 162, 608, 10, 64, "Input"],
+Cell[CellGroupData[{
+Cell[6179, 176, 257, 6, 28, "Print"],
+Cell[6439, 184, 119, 1, 28, "Print"],
+Cell[6561, 187, 316, 7, 105, "Print"]
+}, Open  ]],
+Cell[6892, 197, 73, 1, 38, "Output"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4529, 123, 447, 7, 72, "Subsection"],
-Cell[4979, 132, 829, 12, 102, "Text"],
-Cell[5811, 146, 325, 6, 75, "Input"],
-Cell[6139, 154, 882, 13, 131, "Text"],
-Cell[7024, 169, 546, 9, 45, "Input"]
+Cell[7014, 204, 439, 5, 54, "Subsection"],
+Cell[7456, 211, 888, 14, 88, "Text"],
+Cell[CellGroupData[{
+Cell[8369, 229, 486, 9, 64, "Input"],
+Cell[8858, 240, 73, 1, 38, "Output"]
+}, Open  ]],
+Cell[8946, 244, 940, 14, 113, "Text"],
+Cell[9889, 260, 621, 10, 38, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7607, 183, 413, 5, 72, "Subsection"],
-Cell[8023, 190, 832, 13, 74, "Text"],
-Cell[8858, 205, 333, 6, 45, "Input"]
+Cell[10547, 275, 413, 5, 54, "Subsection"],
+Cell[10963, 282, 832, 13, 61, "Text"],
+Cell[11798, 297, 676, 11, 38, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[9228, 216, 403, 5, 72, "Subsection"],
-Cell[9634, 223, 808, 12, 74, "Text"],
-Cell[10445, 237, 662, 12, 45, "Input"]
+Cell[12511, 313, 403, 5, 54, "Subsection"],
+Cell[12917, 320, 808, 12, 61, "Text"],
+Cell[CellGroupData[{
+Cell[13750, 336, 770, 14, 64, "Input"],
+Cell[14523, 352, 179, 5, 38, "Output"]
+}, Open  ]]
 }, Open  ]]
 }
 ]
 *)
 
-(* End of internal cache information *)
