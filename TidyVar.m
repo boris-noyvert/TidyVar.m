@@ -22,7 +22,7 @@
 BeginPackage["TidyVar`"];
 
 
-$TidyVarVersion="0.2.2";
+$TidyVarVersion="0.2.3";
 
 
 WriteString["stdout","TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016.\n"];
@@ -351,26 +351,41 @@ AlleleCombinations[n_]:=AlleleCombinations[n]=Prepend[Join@@Table[{j2,j1},{j1,1,
 This function takes a set of vectors and assigns each to the closest allele vector, also substituting the closest allele vector by this vector.
 Output: {final substituted list of allele vectors, positions of original vectors in the final list}
 *)
-ClosestVectors[vect_?MatrixQ]:=Module[{d,products,vectororder,productorder,finallist,takenlist,reorderlist},
+ClosestVectors[vect_?MatrixQ]:=Module[{d,n,al,products,perm,nperm,orders,topcombin,perm0,permproducts,permmax,vectororder,productorder,cllct,res},
 d=Length[vect[[1]]];
-If[Length[vect]>Length[AlleleVectors[d]],Return["Too many vectors!"]];
+n=Length[vect];
+al=Length[AlleleVectors[d]];
+If[n>al,Return["Too many vectors!"]];
+
+(* n x al matrix *)
 products=(vect/Norm/@vect).Transpose[NormalizedAlleleVectors[d]];
-vectororder=Reverse[Ordering[Max/@products]];
+nperm=Binomial[al,al-n]Factorial[n];
+
+If[nperm<1000,
+(* If there are not many permutations - check all *)
+(perm=Transpose[{Range[n],#}]&/@Permutations[Range[al],{n}]),
+
+(* If there are many permutations - first find the one by assigning vectors in order *)
+(vectororder=Reverse[Ordering[Max/@products]];
 productorder=Reverse/@(Ordering/@products[[vectororder]]);
-finallist=AlleleVectors[d];
-reorderlist=ConstantArray[0,Length[vect]];
-takenlist={};
-Do[
-Do[If[FreeQ[takenlist,productorder[[j,i]]],
-(AppendTo[takenlist,productorder[[j,i]]];
-finallist[[productorder[[j,i]]]]=vect[[vectororder[[j]]]];
-reorderlist[[vectororder[[j]]]]=productorder[[j,i]];
-(*Print[takenlist,"\t",finallist];*)
-Break[])
-]
-,{i,1,Length[productorder[[j]]]}]
-,{j,1,Length[vectororder]}];
-{finallist,reorderlist}
+cllct={};
+Do[Do[If[FreeQ[cllct,zzz],AppendTo[cllct,zzz];Break[]],{zzz,rrr}],{rrr,productorder}];
+
+(* 2^14 = 16K. If less than 15 vectors check the top 2 options for each vector *)
+If[n>14,
+perm0={},
+(orders=Reverse[Ordering[#]]&/@products;
+topcombin=Flatten[Outer[List,Sequence@@orders[[All,1;;2]]],n-1];perm0=Pick[topcombin,Length/@DeleteDuplicates/@topcombin,n])];
+
+perm=Transpose[{Range[n],#}]&/@Join[perm0,{cllct[[vectororder//Ordering]]}])
+];
+(* Find the assignment which produces the maximal total product *)
+permproducts=Table[Extract[products,rrr]//Total,{rrr,perm}];
+permmax=perm[[Ordering[permproducts,-1]//First]];
+
+res={ReplacePart[AlleleVectors[d],Sequence[#[[2]]->vect[[#[[1]]]]]&/@permmax],permmax[[All,2]]};
+Remove[n,al,products,perm,nperm,orders,topcombin,perm0,permproducts,permmax,vectororder,productorder,cllct];
+res
 ]
 
 
@@ -628,7 +643,7 @@ UseInitialSplit\[Rule]True tells the function to use the gap splitting first, an
 UseInitialSplit\[Rule]False tells the function to use the default initial probabilities {1,0}, {1/2,1/2}, {0,1}.
 *)
 Options[GenotypeReadCounts]={UseInitialSplit->True};
-GenotypeReadCounts[readcounts_?MatrixQ,optns:OptionsPattern[{BinomialBestFit,GenotypeReadCounts,Split2D}]]:=Module[{ll,bbf,genotypes,init0,\[Epsilon],closest,clustn,p,plog,phred,scores},
+GenotypeReadCounts[readcounts_?MatrixQ,optns:OptionsPattern[{BinomialBestFit,GenotypeReadCounts,Split2D}]]:=Module[{ll,bbf,genotypes,init0,\[Epsilon],closest,clustn,p,plog,phred,scores,scores0},
 
 ll=Dimensions[readcounts];
 \[Epsilon]=OptionValue[MinimalProbability];
@@ -665,7 +680,12 @@ Calculate phred scores
 *)
 plog=Map[Log0[#,\[Epsilon]]&,p,{2}]//Transpose;
 phred=readcounts.plog;
+(* old
 scores=Round[10(phred-(Min/@phred))];
+*)
+
+scores0=Round[10(phred-Extract[phred,Transpose[{Range[ll[[1]]],clustn+1-Sign[clustn]}]])];
+scores=Map[If[#<0,1,#]&,scores0,{2}];
 
 (*
 Report {genotypes, probability vectors, phred scores}
@@ -755,11 +775,11 @@ ConvertVariantToVcfLine[variant_List,optns:OptionsPattern[{GenotypeReadCounts,Co
 
 nalleles=Length[variant[[2]]];
 
-If[nalleles===1,Return[{variant[[1,1;;2]],".",
+If[Or[nalleles===1,variant[[2,2]]==="."],Return[{variant[[1,1;;2]],".",
 variant[[2,1]],
 ".",
 0,
-"NoAltAllele",
+"NoAlternativeAllele",
 "AN="<>ToString[2 Length[variant[[3]]]]<>";DP="<>ToString[Plus@@variant[[3,All,1]]],
 "GT:AD:DP:GQ:PL",
 Table["0/0:"<>rrr<>":"<>rrr<>":0:0",{rrr,ToString/@variant[[3,All,1]]}]}//Flatten]];
@@ -1367,7 +1387,7 @@ If[savecoverage,teecmd=" | tee /dev/fd/3 | cut --complement -f "<>StringJoinWith
 
 (*sedcmd="sed 's/\\(\\,\\|\\.\\)//g'";*)
 
-cmd={"("(* "samtools mpileup -BQ0 -d 10000 -A -f" *)
+cmd={"(",(* "samtools mpileup -BQ0 -d 10000 -A -f" *)
 SamtoolsPath<>"samtools mpileup",
 If[OptionValue[SamtoolsFlagFilter]===0,"",{"--ff",OptionValue[SamtoolsFlagFilter]}],
 "-B -A",
