@@ -22,7 +22,7 @@
 BeginPackage["TidyVar`"];
 
 
-$TidyVarVersion="0.2.3";
+$TidyVarVersion="0.2.4";
 
 
 WriteString["stdout","TidyVar package for calling genomic variants from Next Generation Sequencing data.\nVersion ",$TidyVarVersion,"\nBoris Noyvert, Greg Elgar lab, 2014-2016.\n"];
