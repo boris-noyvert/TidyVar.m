@@ -1454,14 +1454,14 @@ result
 
 
 GetReadsFromBamFiles::usage="GetReadsFromBamFiles[bamfiles_, region_, SamtoolsFlagFilter\[Rule]\"0x704\", MinimalReadMappingScore\[Rule]30, LogStream\[Rule]False]
-The function runs samtools view for each bam file in bamfiles (must be sorted and indexed) and outputs 3 sam format columns: the read sequence, the coordinate (no chromosome) and the CIGAR string for each read in the specified region.
+The function runs \'samtools view\' for each bam file in bamfiles (must be sorted and indexed) and outputs 3 sam format columns: the read sequence, the coordinate (no chromosome) and the CIGAR string for each read in the specified region.
 Input: bamfiles is a list of bam files (one individual per each file) or a string like \"*.bam\" that is converted to a list of files using unix command 'ls'.
 inputregion specifies the region to scan for variant candidates in. It can be in the form of a coordinate string like \"chr1:10000000-10000300\", or coordinate list like {chr1,10000000,10000300}, or for multiple regions to be scanned in one go like {chr1,{{10000000,10000300},{20000000,20000300}...}}.
 Output: a list of matrices, one matrix per bam file. Each matrix has 3 columns: the read sequence, the left read coordinate (no chromosome) and the CIGAR string.
 Option SamtoolsFlagFilter->\"0x704\" specifies the filter flags in samtools view command. The default filters out all reads for which one of the following flags is set:\[IndentingNewLine]0x4 (unmapped), 0x100 (not primary), 0x200 (failure), 0x400 (duplicate).
-Last modification: 8 May 2015.";
+Last modification: 22 June 2017.";
 Options[GetReadsFromBamFiles]={SamtoolsFlagFilter->"0x704",MinimalReadMappingScore->30,LogStream->False};
-GetReadsFromBamFiles[bamfiles_,inputregion_,OptionsPattern[GetReadsFromBamFiles]]:=Module[{cmd,flbam,types,region,multiregioncalculation,logs,tm,result},
+GetReadsFromBamFiles[bamfiles_,inputregion_,OptionsPattern[GetReadsFromBamFiles]]:=Module[{cmd,flbam,types,region,multiregioncalculation,logs,tm,regionbedfile,result},
 
 Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,Return["The bam files are ill-defined"]];
 
@@ -1471,9 +1471,21 @@ If[logs=!=False,WriteString[logs,tm=DateString[],"\tStarted to prepare the reads
 
 multiregioncalculation=And[ListQ[inputregion],MatrixQ[inputregion[[2]]]];
 
+If[multiregioncalculation,
+(regionbedfile=FileNameJoin[{TidyVarTmpDirectory,"region_temp_"<>FromCharacterCode[RandomInteger[{97,122},10]]<>".bed"}];
+WriteString[regionbedfile,
+StringJoinWith[StringJoinWith[{inputregion[[1]],#+{-1,0}},"\t"]&/@inputregion[[2]],"\n"]
+];
+Close[regionbedfile])
+];
+
+region={inputregion[[1]],{Min[#],Max[#]}&@inputregion[[2;;]]}//MakeCoordinateString;
+
+(*
 region=If[multiregioncalculation,
 StringJoinWith[MakeCoordinateString[{inputregion[[1]],#}]&/@inputregion[[2]]],
 inputregion//MakeCoordinateString];
+*)
 
 types={Word,Number,Word};
 
@@ -1486,14 +1498,17 @@ cmd={SamtoolsPath<>"samtools view",
 If[OptionValue[SamtoolsFlagFilter]===0,"",{"-F",OptionValue[SamtoolsFlagFilter]}],
 If[OptionValue[MinimalReadMappingScore]===0,"",{"-q",OptionValue[MinimalReadMappingScore]}],
 rr,region,
+If[multiregioncalculation,{"-L",regionbedfile},""],
 "|","awk '{print $10,$4,$6}'"}//StringJoinWith;
 
 RunExternal[cmd,types],
 {rr,flbam}];
 
+DeleteFile[regionbedfile];
+
 If[logs=!=False,WriteString[logs,DateString[],"\tFinished to prepare the reads.\t",NumberForm[-DateDifference[tm,"Second"][[1]],{10,1},ExponentFunction->(Null&)]," seconds.\n"]];
 
-Remove[cmd,flbam,types,region,multiregioncalculation,logs,tm];
+Remove[cmd,flbam,types,region,multiregioncalculation,logs,tm,regionbedfile];
 
 result
 ];
