@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    485344,      11125]
-NotebookOptionsPosition[    476152,      10838]
-NotebookOutlinePosition[    476655,      10858]
-CellTagsIndexPosition[    476612,      10855]
+NotebookDataLength[    487889,      11175]
+NotebookOptionsPosition[    478630,      10885]
+NotebookOutlinePosition[    479133,      10905]
+CellTagsIndexPosition[    479090,      10902]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -786,8 +786,8 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{
        RowBox[{"ApplySort", "\[Rule]", "True"}], ",", 
-       RowBox[{"CombineDistance", "\[Rule]", "1"}]}], "}"}]}], ";"}], "\n", 
-   "\[IndentingNewLine]", 
+       RowBox[{"CombineDistance", "\[Rule]", "1"}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
    RowBox[{
     RowBox[{
      RowBox[{"CombineRegions", "[", 
@@ -923,8 +923,8 @@ Cell[BoxData[
            RowBox[{"res", ",", 
             RowBox[{"ApplySort", "\[Rule]", "False"}], ",", 
             RowBox[{"CombineDistance", "\[Rule]", "dist"}]}], "]"}]}], 
-         "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}], 
-   "\[IndentingNewLine]", "\n", 
+         "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
    RowBox[{"(*", "\[IndentingNewLine]", 
     RowBox[{
     "Converts", " ", "a", " ", "list", " ", "of", " ", "integers", " ", "to", 
@@ -1346,7 +1346,7 @@ Cell[BoxData[
    3.585030897773487*^9, 3.585030917812725*^9}, {3.58503096468814*^9, 
    3.585030981135762*^9}, {3.5850310721825027`*^9, 3.585031072298376*^9}, {
    3.6750682716970863`*^9, 3.675068296486504*^9}}]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -1808,8 +1808,8 @@ Cell[BoxData[
        "\[IndentingNewLine]", 
        RowBox[{"GenotypingCoverage", "\[Rule]", "1"}], ",", 
        "\[IndentingNewLine]", 
-       RowBox[{"PrintReports", "\[Rule]", "False"}]}], "}"}]}], ";"}], "\n", 
-   "\[IndentingNewLine]", 
+       RowBox[{"PrintReports", "\[Rule]", "False"}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
    RowBox[{
     RowBox[{
      RowBox[{"BinomialBestFit", "[", 
@@ -4458,7 +4458,7 @@ Cell[BoxData[{
    3.6745890225336905`*^9}, {3.674589504355994*^9, 3.6745895237094297`*^9}, {
    3.6745895738037252`*^9, 3.6745895738349257`*^9}, {3.6745896364880495`*^9, 
    3.6745896601132927`*^9}, 3.6750672136975718`*^9}]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -4904,10 +4904,10 @@ Cell[BoxData[
      RowBox[{"Options", "[", "PickAlleles", "]"}], "=", 
      RowBox[{"{", 
       RowBox[{
-       RowBox[{"FilterThreshold", "\[Rule]", "0.15"}], ",", 
+       RowBox[{"MinimalRatioNonreferenceReads", "\[Rule]", "0.15"}], ",", 
        RowBox[{"Ploidy", "\[Rule]", "2"}], ",", 
-       RowBox[{"AlleleMinimalReadNumber", "\[Rule]", "3"}]}], "}"}]}], ";"}], 
-   "\[IndentingNewLine]", 
+       RowBox[{"MinimalNumberNonreferenceReads", "\[Rule]", "3"}]}], "}"}]}], 
+    ";"}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{"PickAlleles", "[", 
      RowBox[{"x_List", ",", 
@@ -4919,11 +4919,11 @@ Cell[BoxData[
        "}"}], ",", "\[IndentingNewLine]", 
       RowBox[{
        RowBox[{"mincover", "=", 
-        RowBox[{"OptionValue", "[", "AlleleMinimalReadNumber", "]"}]}], ";", 
-       "\[IndentingNewLine]", 
+        RowBox[{"OptionValue", "[", "MinimalNumberNonreferenceReads", "]"}]}],
+        ";", "\[IndentingNewLine]", 
        RowBox[{"fthr", "=", 
-        RowBox[{"OptionValue", "[", "FilterThreshold", "]"}]}], ";", 
-       "\[IndentingNewLine]", 
+        RowBox[{"OptionValue", "[", "MinimalRatioNonreferenceReads", "]"}]}], 
+       ";", "\[IndentingNewLine]", 
        RowBox[{"plo", "=", 
         RowBox[{"OptionValue", "[", "Ploidy", "]"}]}], ";", 
        "\[IndentingNewLine]", 
@@ -4964,7 +4964,9 @@ Cell[BoxData[
  InitializationCell->True,
  CellChangeTimes->{{3.600418649675374*^9, 3.6004186518940067`*^9}, {
   3.644140702959049*^9, 3.644140703125544*^9}, {3.644144264555932*^9, 
-  3.644144276100623*^9}}],
+  3.644144276100623*^9}, {3.709962434724684*^9, 3.709962492181014*^9}, {
+  3.709962815989923*^9, 3.709962828918833*^9}, {3.709995151742276*^9, 
+  3.70999515207475*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -5143,8 +5145,9 @@ Cell[BoxData[
        RowBox[{"optns", ":", 
         RowBox[{"OptionsPattern", "[", 
          RowBox[{"{", 
-          RowBox[{"CountReadCases", ",", "GetSequenceFromGenomeFasta"}], 
-          "}"}], "]"}]}]}], "]"}], ":=", 
+          RowBox[{
+          "CountReadCases", ",", "GetSequenceFromGenomeFasta", ",", 
+           "PickAlleles"}], "}"}], "]"}]}]}], "]"}], ":=", 
      RowBox[{"Module", "[", 
       RowBox[{
        RowBox[{"{", 
@@ -5158,8 +5161,8 @@ Cell[BoxData[
          "primerlengths", ",", "newprimers", ",", "allelesreffirst", ",", 
          "counts", ",", "error", ",", " ", "flank", ",", "iter", ",", 
          "needtoextendprimers", ",", "sequences", ",", "shortreference", ",", 
-         "newrefcoord", ",", "newrefcoordlocal"}], "}"}], ",", 
-       "\[IndentingNewLine]", "\[IndentingNewLine]", 
+         "newrefcoord", ",", "newrefcoordlocal", ",", "PickAllelesLocal"}], 
+        "}"}], ",", "\[IndentingNewLine]", "\[IndentingNewLine]", 
        RowBox[{
         RowBox[{"readlength", "=", 
          RowBox[{"(", 
@@ -5371,7 +5374,8 @@ Cell[BoxData[
                 RowBox[{"[", "1", "]"}], "]"}], ",", "newrefcoord"}], "}"}], 
              ",", 
              RowBox[{"FilterRules", "[", 
-              RowBox[{"optns", ",", 
+              RowBox[{
+               RowBox[{"{", "optns", "}"}], ",", 
                RowBox[{"Options", "[", "GetSequenceFromGenomeFasta", "]"}]}], 
               "]"}]}], "]"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
         RowBox[{"(*", 
@@ -5560,12 +5564,22 @@ the pattern!\\n\>\"", "<>",
                    RowBox[{"{", "}"}], ",", 
                    RowBox[{"{", "2", "}"}]}], "]"}], ")"}]}]}], ";", 
               "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              RowBox[{
+               RowBox[{"PickAllelesLocal", "[", "x_", "]"}], "=", 
+               RowBox[{"PickAlleles", "[", 
+                RowBox[{"x", ",", 
+                 RowBox[{"FilterRules", "[", 
+                  RowBox[{
+                   RowBox[{"{", "optns", "}"}], ",", 
+                   RowBox[{"Options", "[", "PickAlleles", "]"}]}], "]"}]}], 
+                "]"}]}], ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
               RowBox[{"alleles", "=", 
                RowBox[{"Union", "@@", 
                 RowBox[{"(", 
                  RowBox[{
                   RowBox[{"(", 
-                   RowBox[{"PickAlleles", "/@", "seqcasestally"}], ")"}], "[", 
+                   RowBox[{"PickAllelesLocal", "/@", "seqcasestally"}], ")"}],
+                   "[", 
                   RowBox[{"[", 
                    RowBox[{"All", ",", "All", ",", "1"}], "]"}], "]"}], 
                  ")"}]}]}], ";", "\[IndentingNewLine]", 
@@ -5845,7 +5859,10 @@ the pattern!\\n\>\"", "<>",
    3.644321866313841*^9, 3.6443218696142*^9}, 3.644565274224598*^9, {
    3.644583204820364*^9, 3.6445832318874407`*^9}, {3.6445853535601473`*^9, 
    3.644585361420911*^9}, {3.6445853967025642`*^9, 3.644585410095591*^9}, 
-   3.67549674008992*^9}],
+   3.67549674008992*^9, {3.709962084388714*^9, 3.70996208817628*^9}, {
+   3.709962144141192*^9, 3.7099622118356*^9}, {3.709962257930655*^9, 
+   3.7099623470943947`*^9}, {3.709962975801072*^9, 3.709962976223598*^9}, {
+   3.709963027618004*^9, 3.709963031668088*^9}}],
 
 Cell[BoxData[""], "Input",
  InitializationCell->True,
@@ -6349,8 +6366,9 @@ Cell[BoxData[
     RowBox[{"optns", ":", 
      RowBox[{"OptionsPattern", "[", 
       RowBox[{"{", 
-       RowBox[{"CountReadCases", ",", "GetSequenceFromGenomeFasta"}], "}"}], 
-      "]"}]}]}], "]"}], ":=", 
+       RowBox[{
+       "CountReadCases", ",", "GetSequenceFromGenomeFasta", ",", 
+        "PickAlleles"}], "}"}], "]"}]}]}], "]"}], ":=", 
   RowBox[{"Module", "[", 
    RowBox[{
     RowBox[{"{", 
@@ -6459,7 +6477,7 @@ Cell[BoxData[
    3.6017976103913794`*^9}, {3.601987598737275*^9, 3.6019876023772383`*^9}, {
    3.6106146895450077`*^9, 3.6106146934727373`*^9}, {3.632557378585969*^9, 
    3.632557448916095*^9}, 3.641731948357136*^9, 3.641733606077415*^9, 
-   3.644585411967098*^9}],
+   3.644585411967098*^9, {3.70996306057854*^9, 3.709963064329382*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -6528,7 +6546,8 @@ Cell[BoxData[
                RowBox[{"[", "1", "]"}], "]"}], ",", "1"}], "]"}], ",", 
             RowBox[{"ct", "[", 
              RowBox[{"[", "2", "]"}], "]"}]}], "}"}]}], "}"}]}]}], 
-      "\[IndentingNewLine]", "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
    RowBox[{"(*", " ", "\[IndentingNewLine]", 
     RowBox[{
     "Joins", " ", "all", " ", "subsequent", " ", "regions", " ", "with", " ", 
@@ -6539,8 +6558,7 @@ Cell[BoxData[
       "\[IndentingNewLine]", "Input"}], " ", "is", " ", "in", " ", "a", " ", 
      "form", " ", "of", " ", "list", " ", "of", " ", "pairs", " ", "of", " ", 
      
-     RowBox[{"numbers", "."}]}], "\[IndentingNewLine]", "*)"}], 
-   "\[IndentingNewLine]", 
+     RowBox[{"numbers", "."}]}], "\[IndentingNewLine]", "*)"}], "\n", 
    RowBox[{
     RowBox[{
      RowBox[{"Options", "[", "CombineRegionsWithCounts", "]"}], "=", 
@@ -6872,9 +6890,12 @@ Cell[BoxData[{
                  RowBox[{"FilterRules", "[", 
                   RowBox[{
                    RowBox[{"{", "optns", "}"}], ",", 
-                   RowBox[{
-                   "Options", "[", "GetSequenceFromGenomeFasta", "]"}]}], 
-                  "]"}]}], "]"}]}], ";", 
+                   RowBox[{"Options", "/@", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    "CountReadCases", ",", "PickAlleles", ",", 
+                    "GetSequenceFromGenomeFasta"}], "}"}]}]}], "]"}]}], 
+                "]"}]}], ";", 
               RowBox[{"(*", 
                RowBox[{
                 RowBox[{
@@ -7116,8 +7137,8 @@ Cell[BoxData[{
    3.6436303748087683`*^9}, {3.643630489675866*^9, 3.643630501913333*^9}, {
    3.644323050730926*^9, 3.64432307929247*^9}, {3.6445690069862127`*^9, 
    3.6445690073422956`*^9}, 3.644585413801957*^9, {3.675496816457288*^9, 
-   3.6754968335812674`*^9}}]
-}, Open  ]],
+   3.6754968335812674`*^9}, {3.709978171465711*^9, 3.7099782270821342`*^9}}]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -7186,6 +7207,7 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
      "\[IndentingNewLine]", 
      RowBox[{"MinimalNumberNonreferenceReads", "\[Rule]", "3"}], ",", 
      "\[IndentingNewLine]", 
+     RowBox[{"MaxIndelSize", "\[Rule]", "30"}], ",", "\[IndentingNewLine]", 
      RowBox[{"SamtoolsFlagFilter", "\[Rule]", "\"\<1796\>\""}], ",", 
      "\[IndentingNewLine]", 
      RowBox[{"MinimalBaseSequencingScore", "\[Rule]", "13"}], ",", 
@@ -7206,17 +7228,17 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
     RowBox[{
      RowBox[{"{", 
       RowBox[{
-      "cov", ",", "thr", ",", "genomefasta", ",", "cmd", ",", "awkcmd", ",", 
-       "cutcmd", ",", "flbam", ",", "l", ",", "region", ",", "types", ",", 
-       "mpileup", ",", "coverage", ",", "highcovpos", ",", "highcovmpileup", 
-       ",", "strcount", ",", "posabovethreshold", ",", "varpos", ",", 
-       "deletioninsertioncases", ",", "varlength", ",", "sublength", ",", 
-       "un", ",", "selectpositions", ",", "multiregioncalculation", ",", 
-       "regionbedfile", ",", "maxratios", ",", "savecoverage", ",", "teecmd", 
-       ",", "coveragefile", ",", "logs", ",", "tm", ",", "indelpatterns", ",",
-        "ptrn", ",", "bamlistfile", ",", "nonrefmin", ",", "posaboveminimum", 
-       ",", "nonrefcount", ",", "maxcounts", ",", "result"}], "}"}], ",", 
-     "\[IndentingNewLine]", 
+      "cov", ",", "thr", ",", "genomefasta", ",", "maxindellength", ",", 
+       "cmd", ",", "awkcmd", ",", "cutcmd", ",", "flbam", ",", "l", ",", 
+       "region", ",", "types", ",", "mpileup", ",", "coverage", ",", 
+       "highcovpos", ",", "highcovmpileup", ",", "strcount", ",", 
+       "posabovethreshold", ",", "varpos", ",", "deletioninsertioncases", ",",
+        "varlength", ",", "sublength", ",", "un", ",", "selectpositions", ",",
+        "multiregioncalculation", ",", "regionbedfile", ",", "maxratios", ",",
+        "savecoverage", ",", "teecmd", ",", "coveragefile", ",", "logs", ",", 
+       "tm", ",", "indelpatterns", ",", "ptrn", ",", "bamlistfile", ",", 
+       "nonrefmin", ",", "posaboveminimum", ",", "nonrefcount", ",", 
+       "maxcounts", ",", "result"}], "}"}], ",", "\[IndentingNewLine]", 
      RowBox[{
       RowBox[{"cov", "=", 
        RowBox[{"OptionValue", "[", "MinimalCoverage", "]"}]}], ";", 
@@ -7227,6 +7249,9 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
       RowBox[{"nonrefmin", "=", 
        RowBox[{"OptionValue", "[", "MinimalNumberNonreferenceReads", "]"}]}], 
       ";", "\[IndentingNewLine]", 
+      RowBox[{"maxindellength", "=", 
+       RowBox[{"OptionValue", "[", "MaxIndelSize", "]"}]}], ";", 
+      "\[IndentingNewLine]", 
       RowBox[{"genomefasta", "=", " ", 
        RowBox[{"OptionValue", "[", "FastaFileName", "]"}]}], ";", 
       "\[IndentingNewLine]", 
@@ -7704,19 +7729,24 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
            RowBox[{
             RowBox[{"If", "[", 
              RowBox[{
-              RowBox[{"#", "===", 
-               RowBox[{"{", "}"}]}], ",", 
+              RowBox[{
+               RowBox[{"Length", "[", "#", "]"}], "<", "nonrefmin"}], ",", 
               RowBox[{"{", 
                RowBox[{"0", ",", "0"}], "}"}], ",", 
               RowBox[{"{", 
                RowBox[{
-                RowBox[{"Min", "[", 
-                 RowBox[{
-                  RowBox[{"Min", "[", "#", "]"}], ",", "0"}], "]"}], ",", 
                 RowBox[{"Max", "[", 
                  RowBox[{
-                  RowBox[{"Max", "[", "#", "]"}], ",", "0"}], "]"}]}], 
-               "}"}]}], 
+                  RowBox[{"Min", "[", 
+                   RowBox[{
+                    RowBox[{"Min", "[", "#", "]"}], ",", "0"}], "]"}], ",", 
+                  RowBox[{"-", "maxindellength"}]}], "]"}], ",", 
+                RowBox[{"Min", "[", 
+                 RowBox[{
+                  RowBox[{"Max", "[", 
+                   RowBox[{
+                    RowBox[{"Max", "[", "#", "]"}], ",", "0"}], "]"}], ",", 
+                  "maxindellength"}], "]"}]}], "}"}]}], 
              RowBox[{"(*", 
               RowBox[{
                RowBox[{"Sort", "[", 
@@ -7875,18 +7905,19 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
       "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{"Remove", "[", 
        RowBox[{
-       "cov", ",", "thr", ",", "genomefasta", ",", "cmd", ",", "awkcmd", ",", 
-        "cutcmd", ",", "flbam", ",", "l", ",", "region", ",", "types", ",", 
-        "mpileup", ",", "coverage", ",", "highcovpos", ",", "highcovmpileup", 
-        ",", "strcount", ",", "posabovethreshold", ",", "varpos", ",", 
-        "deletioninsertioncases", ",", "varlength", ",", "sublength", ",", 
-        "un", ",", "selectpositions", ",", "multiregioncalculation", ",", 
-        "regionbedfile", ",", "maxratios", ",", "savecoverage", ",", "teecmd",
-         ",", "coveragefile", ",", "logs", ",", "tm", ",", "indelpatterns", 
-        ",", "ptrn", ",", "bamlistfile", ",", "nonrefmin", ",", 
-        "posaboveminimum", ",", "nonrefcount", ",", "maxcounts"}], "]"}], ";",
-       "\[IndentingNewLine]", "\[IndentingNewLine]", "result"}]}], 
-    "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]"}], "Input",
+       "cov", ",", "thr", ",", "genomefasta", ",", "maxindellength", ",", 
+        "cmd", ",", "awkcmd", ",", "cutcmd", ",", "flbam", ",", "l", ",", 
+        "region", ",", "types", ",", "mpileup", ",", "coverage", ",", 
+        "highcovpos", ",", "highcovmpileup", ",", "strcount", ",", 
+        "posabovethreshold", ",", "varpos", ",", "deletioninsertioncases", 
+        ",", "varlength", ",", "sublength", ",", "un", ",", "selectpositions",
+         ",", "multiregioncalculation", ",", "regionbedfile", ",", 
+        "maxratios", ",", "savecoverage", ",", "teecmd", ",", "coveragefile", 
+        ",", "logs", ",", "tm", ",", "indelpatterns", ",", "ptrn", ",", 
+        "bamlistfile", ",", "nonrefmin", ",", "posaboveminimum", ",", 
+        "nonrefcount", ",", "maxcounts"}], "]"}], ";", "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", "result"}]}], "\[IndentingNewLine]", "]"}]}], 
+  ";"}], "\[IndentingNewLine]"}], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.586259867946371*^9, 3.5862599301742373`*^9}, {
    3.586260092490796*^9, 3.5862601355216303`*^9}, {3.586260169510846*^9, 
@@ -7981,7 +8012,9 @@ one location.\nLast modification: 21 Nov 2016.\>\""}],
    3.688723061160961*^9, 3.688723114278565*^9}, {3.688723339368586*^9, 
    3.6887234092649384`*^9}, {3.688735254381466*^9, 3.688735356227265*^9}, {
    3.6887356535589542`*^9, 3.6887357543694563`*^9}, 3.6889971815072412`*^9, 
-   3.695392859151774*^9}],
+   3.695392859151774*^9, {3.709994194301478*^9, 3.709994214015059*^9}, {
+   3.7099944257300053`*^9, 3.709994433548006*^9}, {3.7099948660984898`*^9, 
+   3.7099950261571283`*^9}, {3.7100740244938993`*^9, 3.7100740289779243`*^9}}],
 
 Cell[BoxData[{
  RowBox[{
@@ -9458,7 +9491,7 @@ Cell[BoxData[
   3.643628469150283*^9}, {3.64362866192344*^9, 3.643628705586244*^9}, {
   3.643628740990285*^9, 3.643628795422765*^9}, {3.64362906363809*^9, 
   3.643629292331645*^9}, {3.643629331504775*^9, 3.643629331543046*^9}}]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -10805,11 +10838,25 @@ Cell[BoxData[{
   3.6685078032920628`*^9, 3.668507823561222*^9}, {3.6685078644455605`*^9, 
   3.6685078672937236`*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
   RowBox[{"End", "[", "]"}], ";"}]], "Input",
  Evaluatable->True,
  InitializationCell->True],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"End", "::", "noctx"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"No previous context defined. \\!\\(\\*ButtonBox[\\\"\
+\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
+ButtonData:>\\\"paclet:ref/message/End/noctx\\\", ButtonNote -> \
+\\\"End::noctx\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.709996453483506*^9, 3.710073021658947*^9}]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -10831,7 +10878,7 @@ Cell[BoxData[
 ButtonData:>\\\"paclet:ref/message/EndPackage/noctx\\\", ButtonNote -> \
 \\\"EndPackage::noctx\\\"]\\)\"\>"}]], "Message", "MSG",
  CellChangeTimes->{3.688732837607827*^9, 3.696238512179171*^9, 
-  3.696238553827121*^9}]
+  3.696238553827121*^9, 3.70999645357683*^9, 3.710073021686789*^9}]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]
@@ -10893,237 +10940,240 @@ Cell[3981, 122, 110, 2, 38, "Input",
  InitializationCell->True],
 Cell[4094, 126, 71, 1, 38, "Input",
  InitializationCell->True],
-Cell[4168, 129, 77, 1, 47, "Input",
+Cell[4168, 129, 77, 1, 38, "Input",
  InitializationCell->True],
-Cell[4248, 132, 70, 1, 47, "Input",
+Cell[4248, 132, 70, 1, 38, "Input",
  InitializationCell->True],
-Cell[4321, 135, 66, 1, 47, "Input",
+Cell[4321, 135, 66, 1, 38, "Input",
  InitializationCell->True],
-Cell[4390, 138, 131, 2, 47, "Input",
+Cell[4390, 138, 131, 2, 38, "Input",
  InitializationCell->True],
-Cell[4524, 142, 68, 1, 47, "Input",
+Cell[4524, 142, 68, 1, 38, "Input",
  InitializationCell->True],
-Cell[4595, 145, 132, 2, 47, "Input",
+Cell[4595, 145, 132, 2, 38, "Input",
  InitializationCell->True],
-Cell[4730, 149, 134, 2, 47, "Input",
+Cell[4730, 149, 134, 2, 38, "Input",
  InitializationCell->True],
-Cell[4867, 153, 136, 2, 47, "Input",
+Cell[4867, 153, 136, 2, 38, "Input",
  InitializationCell->True],
-Cell[5006, 157, 149, 2, 47, "Input",
+Cell[5006, 157, 149, 2, 38, "Input",
  InitializationCell->True],
-Cell[5158, 161, 174, 3, 47, "Input",
+Cell[5158, 161, 174, 3, 38, "Input",
  InitializationCell->True],
-Cell[5335, 166, 144, 2, 47, "Input",
+Cell[5335, 166, 144, 2, 38, "Input",
  InitializationCell->True],
-Cell[5482, 170, 142, 2, 47, "Input",
+Cell[5482, 170, 142, 2, 38, "Input",
  InitializationCell->True],
-Cell[5627, 174, 141, 2, 47, "Input",
+Cell[5627, 174, 141, 2, 38, "Input",
  InitializationCell->True],
-Cell[5771, 178, 132, 2, 47, "Input",
+Cell[5771, 178, 132, 2, 38, "Input",
  InitializationCell->True],
-Cell[5906, 182, 136, 2, 47, "Input",
+Cell[5906, 182, 136, 2, 38, "Input",
  InitializationCell->True],
-Cell[6045, 186, 184, 3, 47, "Input",
+Cell[6045, 186, 184, 3, 38, "Input",
  InitializationCell->True],
-Cell[6232, 191, 297, 4, 47, "Input",
+Cell[6232, 191, 297, 4, 38, "Input",
  InitializationCell->True],
-Cell[6532, 197, 290, 4, 58, "Input",
+Cell[6532, 197, 290, 4, 38, "Input",
  InitializationCell->True],
-Cell[6825, 203, 183, 3, 58, "Input",
+Cell[6825, 203, 183, 3, 38, "Input",
  InitializationCell->True],
-Cell[7011, 208, 238, 4, 58, "Input",
+Cell[7011, 208, 238, 4, 38, "Input",
  InitializationCell->True],
-Cell[7252, 214, 294, 4, 58, "Input",
+Cell[7252, 214, 294, 4, 38, "Input",
  InitializationCell->True],
-Cell[7549, 220, 294, 4, 58, "Input",
+Cell[7549, 220, 294, 4, 38, "Input",
  InitializationCell->True],
-Cell[7846, 226, 243, 4, 58, "Input",
+Cell[7846, 226, 243, 4, 38, "Input",
  InitializationCell->True]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8126, 235, 118, 2, 152, "Section",
+Cell[8126, 235, 118, 2, 98, "Section",
  InitializationCell->True],
-Cell[8247, 239, 119, 3, 58, "Input",
+Cell[8247, 239, 119, 3, 38, "Input",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[8391, 246, 229, 4, 83, "Subsection",
+Cell[8391, 246, 229, 4, 54, "Subsection",
  InitializationCell->True],
-Cell[8623, 252, 3408, 78, 495, "Input",
+Cell[8623, 252, 3408, 78, 317, "Input",
  InitializationCell->True],
-Cell[12034, 332, 1759, 44, 377, "Input",
+Cell[12034, 332, 1759, 44, 242, "Input",
  InitializationCell->True],
-Cell[13796, 378, 2921, 59, 646, "Input",
+Cell[13796, 378, 2921, 59, 414, "Input",
  InitializationCell->True],
-Cell[16720, 439, 1494, 36, 372, "Input",
+Cell[16720, 439, 1494, 36, 239, "Input",
  InitializationCell->True],
-Cell[18217, 477, 970, 25, 177, "Input",
+Cell[18217, 477, 970, 25, 114, "Input",
  InitializationCell->True],
-Cell[19190, 504, 4823, 102, 920, "Input",
+Cell[19190, 504, 4823, 102, 589, "Input",
  InitializationCell->True],
-Cell[24016, 608, 1268, 33, 295, "Input",
+Cell[24016, 608, 1268, 33, 189, "Input",
  InitializationCell->True],
-Cell[25287, 643, 1596, 42, 333, "Input",
+Cell[25287, 643, 1596, 42, 214, "Input",
  InitializationCell->True],
-Cell[26886, 687, 3642, 79, 997, "Input",
+Cell[26886, 687, 3642, 79, 639, "Input",
  InitializationCell->True],
-Cell[30531, 768, 9358, 243, 1583, "Input",
+Cell[30531, 768, 9358, 243, 1014, "Input",
  InitializationCell->True],
-Cell[39892, 1013, 2024, 54, 333, "Input",
+Cell[39892, 1013, 2024, 54, 214, "Input",
  InitializationCell->True],
-Cell[41919, 1069, 1832, 49, 320, "Input",
+Cell[41919, 1069, 1832, 49, 205, "Input",
  InitializationCell->True],
-Cell[43754, 1120, 10120, 227, 1957, "Input",
- InitializationCell->True]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[53911, 1352, 184, 3, 66, "Subsection",
- InitializationCell->True],
-Cell[54098, 1357, 891, 22, 177, "Input",
- InitializationCell->True],
-Cell[54992, 1381, 3621, 94, 585, "Input",
- InitializationCell->True],
-Cell[58616, 1477, 10908, 254, 1951, "Input",
- InitializationCell->True],
-Cell[69527, 1733, 9643, 222, 1803, "Input",
- InitializationCell->True],
-Cell[79173, 1957, 8559, 207, 1607, "Input",
- InitializationCell->True],
-Cell[87735, 2166, 12551, 276, 2716, "Input",
- InitializationCell->True],
-Cell[100289, 2444, 2434, 56, 490, "Input",
- InitializationCell->True],
-Cell[102726, 2502, 4755, 113, 1178, "Input",
- InitializationCell->True],
-Cell[107484, 2617, 7273, 168, 1232, "Input",
- InitializationCell->True],
-Cell[114760, 2787, 4917, 117, 763, "Input",
- InitializationCell->True],
-Cell[119680, 2906, 1476, 37, 216, "Input",
- InitializationCell->True],
-Cell[121159, 2945, 1939, 47, 451, "Input",
- InitializationCell->True],
-Cell[123101, 2994, 13384, 306, 2756, "Input",
- InitializationCell->True],
-Cell[136488, 3302, 8420, 199, 1193, "Input",
- InitializationCell->True],
-Cell[144911, 3503, 3148, 77, 607, "Input",
- InitializationCell->True],
-Cell[148062, 3582, 2588, 57, 451, "Input",
- InitializationCell->True],
-Cell[150653, 3641, 4050, 100, 451, "Input",
- InitializationCell->True],
-Cell[154706, 3743, 867, 23, 100, "Input",
- InitializationCell->True],
-Cell[155576, 3768, 21287, 456, 4412, "Input",
- InitializationCell->True],
-Cell[176866, 4226, 2007, 57, 256, "Input",
- InitializationCell->True],
-Cell[178876, 4285, 7464, 174, 1353, "Input",
- InitializationCell->True]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[186377, 4464, 142, 2, 83, "Subsection",
- InitializationCell->True],
-Cell[186522, 4468, 651, 16, 177, "Input",
- InitializationCell->True],
-Cell[187176, 4486, 9395, 186, 1193, "Input",
- InitializationCell->True],
-Cell[196574, 4674, 8323, 186, 1466, "Input",
- InitializationCell->True],
-Cell[204900, 4862, 4184, 104, 685, "Input",
- InitializationCell->True],
-Cell[209087, 4968, 2022, 55, 451, "Input",
- InitializationCell->True],
-Cell[211112, 5025, 39372, 822, 6076, "Input",
- InitializationCell->True],
-Cell[250487, 5849, 123, 2, 58, "Input",
- InitializationCell->True],
-Cell[250613, 5853, 4673, 113, 881, "Input",
- InitializationCell->True],
-Cell[255289, 5968, 696, 20, 100, "Input",
- InitializationCell->True],
-Cell[255988, 5990, 900, 22, 100, "Input",
- InitializationCell->True],
-Cell[256891, 6014, 3715, 91, 881, "Input",
- InitializationCell->True],
-Cell[260609, 6107, 8495, 201, 1193, "Input",
- InitializationCell->True],
-Cell[269107, 6310, 1061, 29, 138, "Input",
- InitializationCell->True],
-Cell[270171, 6341, 5010, 120, 802, "Input",
- InitializationCell->True],
-Cell[275184, 6463, 6749, 167, 1048, "Input",
- InitializationCell->True],
-Cell[281936, 6632, 23375, 486, 2892, "Input",
- InitializationCell->True]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[305348, 7123, 179, 3, 67, "Subsection",
- InitializationCell->True],
-Cell[305530, 7128, 41127, 855, 6933, "Input",
- InitializationCell->True],
-Cell[346660, 7985, 13747, 283, 2486, "Input",
- InitializationCell->True],
-Cell[360410, 8270, 2028, 57, 271, "Input",
- InitializationCell->True],
-Cell[362441, 8329, 14530, 299, 2236, "Input",
- InitializationCell->True]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[377008, 8633, 272, 4, 53, "Subsection",
- InitializationCell->True],
-Cell[377283, 8639, 33494, 660, 5173, "Input",
- InitializationCell->True],
-Cell[410780, 9301, 3844, 75, 1232, "Input",
- InitializationCell->True],
-Cell[414627, 9378, 3110, 81, 490, "Input",
- InitializationCell->True]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[417774, 9464, 360, 5, 66, "Subsection",
- InitializationCell->True],
-Cell[418137, 9471, 4559, 113, 890, "Input",
- InitializationCell->True],
-Cell[422699, 9586, 1703, 41, 451, "Input",
- InitializationCell->True],
-Cell[424405, 9629, 2911, 64, 725, "Input",
- InitializationCell->True],
-Cell[427319, 9695, 3050, 66, 685, "Input",
- InitializationCell->True],
-Cell[430372, 9763, 18148, 390, 2666, "Input",
- InitializationCell->True],
-Cell[448523, 10155, 3515, 86, 802, "Input",
- InitializationCell->True],
-Cell[452041, 10243, 1786, 50, 216, "Input",
- InitializationCell->True],
-Cell[453830, 10295, 10127, 237, 1583, "Input",
+Cell[43754, 1120, 10120, 227, 1253, "Input",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[463994, 10537, 399, 6, 66, "Subsection",
+Cell[53911, 1352, 184, 3, 43, "Subsection",
  InitializationCell->True],
-Cell[464396, 10545, 2577, 56, 333, "Input",
+Cell[54098, 1357, 891, 22, 114, "Input",
  InitializationCell->True],
-Cell[466976, 10603, 3910, 90, 568, "Input",
+Cell[54992, 1381, 3621, 94, 375, "Input",
  InitializationCell->True],
-Cell[470889, 10695, 3036, 73, 490, "Input",
+Cell[58616, 1477, 10908, 254, 1230, "Input",
+ InitializationCell->True],
+Cell[69527, 1733, 9643, 222, 1155, "Input",
+ InitializationCell->True],
+Cell[79173, 1957, 8559, 207, 1029, "Input",
+ InitializationCell->True],
+Cell[87735, 2166, 12551, 276, 1739, "Input",
+ InitializationCell->True],
+Cell[100289, 2444, 2434, 56, 314, "Input",
+ InitializationCell->True],
+Cell[102726, 2502, 4755, 113, 755, "Input",
+ InitializationCell->True],
+Cell[107484, 2617, 7273, 168, 789, "Input",
+ InitializationCell->True],
+Cell[114760, 2787, 4917, 117, 489, "Input",
+ InitializationCell->True],
+Cell[119680, 2906, 1476, 37, 139, "Input",
+ InitializationCell->True],
+Cell[121159, 2945, 1939, 47, 289, "Input",
+ InitializationCell->True],
+Cell[123101, 2994, 13384, 306, 1764, "Input",
+ InitializationCell->True],
+Cell[136488, 3302, 8420, 199, 1491, "Input",
+ InitializationCell->True],
+Cell[144911, 3503, 3148, 77, 758, "Input",
+ InitializationCell->True],
+Cell[148062, 3582, 2588, 57, 563, "Input",
+ InitializationCell->True],
+Cell[150653, 3641, 4050, 100, 563, "Input",
+ InitializationCell->True],
+Cell[154706, 3743, 867, 23, 125, "Input",
+ InitializationCell->True],
+Cell[155576, 3768, 21287, 456, 5515, "Input",
+ InitializationCell->True],
+Cell[176866, 4226, 2007, 57, 320, "Input",
+ InitializationCell->True],
+Cell[178876, 4285, 7464, 174, 1691, "Input",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[473962, 10773, 350, 5, 66, "Subsection",
+Cell[186377, 4464, 142, 2, 43, "Subsection",
  InitializationCell->True],
-Cell[474315, 10780, 178, 4, 175, "Input",
+Cell[186522, 4468, 651, 16, 114, "Input",
  InitializationCell->True],
-Cell[474496, 10786, 815, 19, 303, "Input",
+Cell[187176, 4486, 9395, 186, 764, "Input",
  InitializationCell->True],
-Cell[475314, 10807, 116, 4, 175, "Input",
- Evaluatable->True,
+Cell[196574, 4674, 8323, 186, 939, "Input",
+ InitializationCell->True],
+Cell[204900, 4862, 4370, 106, 464, "Input",
+ InitializationCell->True],
+Cell[209273, 4970, 2022, 55, 289, "Input",
+ InitializationCell->True],
+Cell[211298, 5027, 40181, 837, 3964, "Input",
+ InitializationCell->True],
+Cell[251482, 5866, 123, 2, 38, "Input",
+ InitializationCell->True],
+Cell[251608, 5870, 4673, 113, 564, "Input",
+ InitializationCell->True],
+Cell[256284, 5985, 696, 20, 64, "Input",
+ InitializationCell->True],
+Cell[256983, 6007, 900, 22, 64, "Input",
+ InitializationCell->True],
+Cell[257886, 6031, 3715, 91, 564, "Input",
+ InitializationCell->True],
+Cell[261604, 6124, 8495, 201, 764, "Input",
+ InitializationCell->True],
+Cell[270102, 6327, 1061, 29, 89, "Input",
+ InitializationCell->True],
+Cell[271166, 6358, 5085, 121, 514, "Input",
+ InitializationCell->True],
+Cell[276254, 6481, 6749, 167, 839, "Input",
+ InitializationCell->True],
+Cell[283006, 6650, 23554, 489, 2339, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[306597, 7144, 179, 3, 43, "Subsection",
+ InitializationCell->True],
+Cell[306779, 7149, 41855, 867, 5647, "Input",
+ InitializationCell->True],
+Cell[348637, 8018, 13747, 283, 1989, "Input",
+ InitializationCell->True],
+Cell[362387, 8303, 2028, 57, 214, "Input",
+ InitializationCell->True],
+Cell[364418, 8362, 14530, 299, 1789, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[378985, 8666, 272, 4, 54, "Subsection",
+ InitializationCell->True],
+Cell[379260, 8672, 33494, 660, 4139, "Input",
+ InitializationCell->True],
+Cell[412757, 9334, 3844, 75, 789, "Input",
+ InitializationCell->True],
+Cell[416604, 9411, 3110, 81, 314, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[419751, 9497, 360, 5, 43, "Subsection",
+ InitializationCell->True],
+Cell[420114, 9504, 4559, 113, 1112, "Input",
+ InitializationCell->True],
+Cell[424676, 9619, 1703, 41, 563, "Input",
+ InitializationCell->True],
+Cell[426382, 9662, 2911, 64, 906, "Input",
+ InitializationCell->True],
+Cell[429296, 9728, 3050, 66, 856, "Input",
+ InitializationCell->True],
+Cell[432349, 9796, 18148, 390, 3332, "Input",
+ InitializationCell->True],
+Cell[450500, 10188, 3515, 86, 1002, "Input",
+ InitializationCell->True],
+Cell[454018, 10276, 1786, 50, 270, "Input",
+ InitializationCell->True],
+Cell[455807, 10328, 10127, 237, 1978, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[465971, 10570, 399, 6, 43, "Subsection",
+ InitializationCell->True],
+Cell[466373, 10578, 2577, 56, 416, "Input",
+ InitializationCell->True],
+Cell[468953, 10636, 3910, 90, 710, "Input",
+ InitializationCell->True],
+Cell[472866, 10728, 3036, 73, 612, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[475939, 10806, 350, 5, 43, "Subsection",
+ InitializationCell->True],
+Cell[476292, 10813, 178, 4, 218, "Input",
+ InitializationCell->True],
+Cell[476473, 10819, 815, 19, 378, "Input",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[475455, 10815, 187, 6, 175, "Input",
+Cell[477313, 10842, 116, 4, 218, "Input",
  Evaluatable->True,
  InitializationCell->True],
-Cell[475645, 10823, 467, 10, 108, "Message"]
+Cell[477432, 10848, 421, 9, 70, "Message"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[477890, 10862, 187, 6, 218, "Input",
+ Evaluatable->True,
+ InitializationCell->True],
+Cell[478080, 10870, 510, 10, 70, "Message"]
 }, Open  ]]
 }, Closed]]
 }, Open  ]]

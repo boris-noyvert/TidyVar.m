@@ -960,10 +960,10 @@ It takes a "Tally" list of alleles in the form {{A,na},{B,nb},{C,nc}},
 calculates the total number of reads N=na+nb+nc, then picks only those alleles that the number of supporting reads is larger than 0.15N.
 Then if the number of alleles is larger than 2 (ploidy) the function only keeps the 2 alleles with the largest number of supporting reads.
 *)
-Options[PickAlleles]={FilterThreshold->0.15,Ploidy->2,AlleleMinimalReadNumber->3};
+Options[PickAlleles]={MinimalRatioNonreferenceReads->0.15,Ploidy->2,MinimalNumberNonreferenceReads->3};
 PickAlleles[x_List,OptionsPattern[PickAlleles]]:=Module[{fthr,thr,pck,plo,mincover},
-mincover=OptionValue[AlleleMinimalReadNumber];
-fthr=OptionValue[FilterThreshold];
+mincover=OptionValue[MinimalNumberNonreferenceReads];
+fthr=OptionValue[MinimalRatioNonreferenceReads];
 plo=OptionValue[Ploidy];
 thr=Max[Total[x[[All,2]]]fthr,mincover];
 pck=Pick[x,(#[[2]]>=thr)&/@x];
@@ -999,7 +999,7 @@ or in many reads, than the multiple cases are analyzed and the primers are prolo
 If the right primer has to be extended, but cannot be due to the right limit, "Right primer cannot be prolonged" is returned.
 *)
 Options[CountReadCases]={};
-CountReadCases[coordinatesandbasecounts_List,sequencescoordinatescigar_List,leftvariants_List:{},rightvariantfirstcoord_Integer:-1,optns:OptionsPattern[{CountReadCases,GetSequenceFromGenomeFasta}]]:=Module[{readlength,chrcoord,basecounts,maxshifts,reference,MakeLocalCoord,localstart,leftvariantslocal,basesavailableontheright,rightprimerinput,leftprimerinput,rightprimer,leftprimer,primerpattern,ctch,refcases,seqcasestally,alleles,multiplecases,primerlengths,newprimers,allelesreffirst,counts,error, flank,iter,needtoextendprimers,sequences,shortreference,newrefcoord,newrefcoordlocal},
+CountReadCases[coordinatesandbasecounts_List,sequencescoordinatescigar_List,leftvariants_List:{},rightvariantfirstcoord_Integer:-1,optns:OptionsPattern[{CountReadCases,GetSequenceFromGenomeFasta,PickAlleles}]]:=Module[{readlength,chrcoord,basecounts,maxshifts,reference,MakeLocalCoord,localstart,leftvariantslocal,basesavailableontheright,rightprimerinput,leftprimerinput,rightprimer,leftprimer,primerpattern,ctch,refcases,seqcasestally,alleles,multiplecases,primerlengths,newprimers,allelesreffirst,counts,error, flank,iter,needtoextendprimers,sequences,shortreference,newrefcoord,newrefcoordlocal,PickAllelesLocal},
 
 readlength=(StringLength/@Flatten[DeleteCases[sequencescoordinatescigar,{},{1}][[All,1,1]]]//Max);
 
@@ -1038,7 +1038,7 @@ newrefcoord={chrcoord[[2]]-primerlengths[[1]]-flank,chrcoord[[3]]+primerlengths[
 newrefcoordlocal=MakeLocalCoord/@newrefcoord;
 If[And[newrefcoordlocal[[1]]>0,newrefcoordlocal[[2]]<=StringLength[reference]],
 shortreference=StringTake[reference,newrefcoordlocal],
-shortreference=GetSequenceFromGenomeFasta[{chrcoord[[1]],newrefcoord},FilterRules[optns,Options[GetSequenceFromGenomeFasta]]]];
+shortreference=GetSequenceFromGenomeFasta[{chrcoord[[1]],newrefcoord},FilterRules[{optns},Options[GetSequenceFromGenomeFasta]]]];
 (*shortreference=StringTake[reference,MakeLocalCoord/@{chrcoord[[2]]-primerlengths[[1]]-flank,chrcoord[[3]]+primerlengths[[2]]+flank}];*)
 
 localstart=newrefcoord[[1]]-1;
@@ -1074,7 +1074,9 @@ If[Length[refcases]>1,Throw[{refcases}]];
 
 seqcasestally=Tally[#]&/@(DeleteCases[StringCases[#,primerpattern,Overlaps->All]&/@sequences,{},{2}]);
 
-alleles=Union@@((PickAlleles/@seqcasestally)[[All,All,1]]);
+PickAllelesLocal[x_]=PickAlleles[x,FilterRules[{optns},Options[PickAlleles]]];
+
+alleles=Union@@((PickAllelesLocal/@seqcasestally)[[All,All,1]]);
 (*Print["alleles: ",alleles];*)
 If[Max[Length/@alleles]>1,Throw[alleles],(error="OK";Break[])];
 ];
@@ -1188,7 +1190,7 @@ pos[[1]]-1+BoundaryPositionsSimple[sortedintegerlist[[Range@@pos]],y]
 SelectSequences[seqcoord_List,coords_List,readlength_Integer:100]:=Table[cas[[Range@@BoundaryPositions[cas[[All,2]],{coords[[2]]-readlength,coords[[1]]}],1]],{cas,seqcoord}];
 
 
-CountReadCasesTop[coordinatesandbasecounts_List,sequences_List,leftvariants_List:{},rightvariantfirstcoord_Integer:-1,optns:OptionsPattern[{CountReadCases,GetSequenceFromGenomeFasta}]]:=Module[{firstcount,varsreduced,newcoords,newbasecounts,secondcount},
+CountReadCasesTop[coordinatesandbasecounts_List,sequences_List,leftvariants_List:{},rightvariantfirstcoord_Integer:-1,optns:OptionsPattern[{CountReadCases,GetSequenceFromGenomeFasta,PickAlleles}]]:=Module[{firstcount,varsreduced,newcoords,newbasecounts,secondcount},
 
 firstcount=CountReadCases[coordinatesandbasecounts,sequences,leftvariants,rightvariantfirstcoord,optns];
 If[StringQ[firstcount],Return[firstcount]];
@@ -1278,7 +1280,7 @@ Catch[
 If[previousvars==={},varj=suspectedvariants[[j]],varj=CombineTwoRegionsWithCounts[{previousvars,suspectedvariants[[j]]}](*;Print["--->",j,"\t",varj]*)];
 
 (*Print[varj,"\t",*)
-countsj=CountReadCasesTop[{{chr,varj[[1]]},varj[[2]]},seqcoord,{#[[1,2;;3]],#[[2]]}&/@If[reslength>5,res[[-5;;-1]],res],If[j===l,-1,suspectedvariants[[j+1,1,1]]],FilterRules[{optns},Options[GetSequenceFromGenomeFasta]]];(*//AbsoluteTiming];*)
+countsj=CountReadCasesTop[{{chr,varj[[1]]},varj[[2]]},seqcoord,{#[[1,2;;3]],#[[2]]}&/@If[reslength>5,res[[-5;;-1]],res],If[j===l,-1,suspectedvariants[[j+1,1,1]]],FilterRules[{optns},Options/@{CountReadCases,PickAlleles,GetSequenceFromGenomeFasta}]];(*//AbsoluteTiming];*)
 
 If[countsj==="No variants",previousvars={};Throw[1]];
 If[countsj==="Right primer cannot be prolonged",previousvars=varj;Throw[1]];
@@ -1324,16 +1326,18 @@ FastaFileName->GenomeFastaFile,
 MinimalCoverage->6,
 MinimalRatioNonreferenceReads->0.2,
 MinimalNumberNonreferenceReads->3,
+MaxIndelSize->30,
 SamtoolsFlagFilter->"1796",
 MinimalBaseSequencingScore->13,
 MinimalReadMappingScore->30,
 SaveCoverage->False,
 LogStream->False
 };
-ScanForVariantCandidates[bamfiles_,inputregion_,optns:OptionsPattern[{ScanForVariantCandidates}]]:=Module[{cov,thr,genomefasta,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts,result},
+ScanForVariantCandidates[bamfiles_,inputregion_,optns:OptionsPattern[{ScanForVariantCandidates}]]:=Module[{cov,thr,genomefasta,maxindellength,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts,result},
 cov=OptionValue[MinimalCoverage];
 thr=OptionValue[MinimalRatioNonreferenceReads];
 nonrefmin=OptionValue[MinimalNumberNonreferenceReads];
+maxindellength=OptionValue[MaxIndelSize];
 genomefasta= OptionValue[FastaFileName];
 CheckFileExistence[genomefasta];
 logs=OptionValue[LogStream];
@@ -1433,7 +1437,7 @@ posabovethreshold=posaboveminimum[[Join@@Position[Sign[(strcount[[posaboveminimu
 If[posabovethreshold=!={},
 
 (* Looks for deletions and insertions and gives the number of bases that may have been deleted and inserted *)
-deletioninsertioncases=If[#==={},{0,0},{Min[Min[#],0],Max[Max[#],0]}(*Sort[Append[#,0]][[{1,-1}]]*)]&/@Map[ToExpression,StringCases[highcovmpileup[[posabovethreshold]],("+"|"-")~~DigitCharacter..(*yyy:(("+"|"-")~~DigitCharacter..)~~LetterCharacter..\[Rule]yyy*)],{2}];
+deletioninsertioncases=If[Length[#]<nonrefmin,{0,0},{Max[Min[Min[#],0],-maxindellength],Min[Max[Max[#],0],maxindellength]}(*Sort[Append[#,0]][[{1,-1}]]*)]&/@Map[ToExpression,StringCases[highcovmpileup[[posabovethreshold]],("+"|"-")~~DigitCharacter..(*yyy:(("+"|"-")~~DigitCharacter..)~~LetterCharacter..\[Rule]yyy*)],{2}];
 
 (* Unflattens the long list, counts the position, length and possible number of bases for each variant *)
 {varpos,varlength,sublength,maxratios,maxcounts}=Transpose[{#[[1,1]],un=(Union@@(#[[All,2]]))[[{1,-1}]];-un[[1]],un-un[[1]]+1,Max[#[[All,3]]],Max[#[[All,4]]]}&/@GatherBy[Transpose[{Quotient[highcovpos[[posabovethreshold]],l,1]+1,deletioninsertioncases,((nonrefcount=strcount[[posabovethreshold]])//N)/(coverage[[highcovpos[[posabovethreshold]]]]//N),nonrefcount}],First]
@@ -1446,7 +1450,7 @@ result={}
 
 If[logs=!=False,WriteString[logs,DateString[],"\tFinished the initial variant scan. Found ",Length[result]," potential variant locations.\t",NumberForm[-DateDifference[tm,"Second"][[1]],{10,1},ExponentFunction->(Null&)]," seconds.\n"]];
 
-Remove[cov,thr,genomefasta,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts];
+Remove[cov,thr,genomefasta,maxindellength,cmd,awkcmd,cutcmd,flbam,l,region,types,mpileup,coverage,highcovpos,highcovmpileup,strcount,posabovethreshold,varpos,deletioninsertioncases,varlength,sublength,un,selectpositions,multiregioncalculation,regionbedfile,maxratios,savecoverage,teecmd,coveragefile,logs,tm,indelpatterns,ptrn,bamlistfile,nonrefmin,posaboveminimum,nonrefcount,maxcounts];
 
 result
 ];
