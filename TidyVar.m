@@ -1393,7 +1393,7 @@ If[savecoverage,teecmd=" | tee /dev/fd/3 | cut --complement -f "<>StringJoinWith
 
 cmd={"(",(* "samtools mpileup -BQ0 -d 10000 -A -f" *)
 SamtoolsPath<>"samtools mpileup",
-If[OptionValue[SamtoolsFlagFilter]===0,"",{"--ff",OptionValue[SamtoolsFlagFilter]}],
+"--ff",OptionValue[SamtoolsFlagFilter],
 "-B -A",
 "-Q",OptionValue[MinimalBaseSequencingScore],
 If[OptionValue[MinimalReadMappingScore]===0,"",{"-q",OptionValue[MinimalReadMappingScore]}],
@@ -1464,7 +1464,7 @@ inputregion specifies the region to scan for variant candidates in. It can be in
 Output: a list of matrices, one matrix per bam file. Each matrix has 3 columns: the read sequence, the left read coordinate (no chromosome) and the CIGAR string.
 Option SamtoolsFlagFilter->\"0x704\" specifies the filter flags in samtools view command. The default filters out all reads for which one of the following flags is set:\[IndentingNewLine]0x4 (unmapped), 0x100 (not primary), 0x200 (failure), 0x400 (duplicate).
 Last modification: 22 June 2017.";
-Options[GetReadsFromBamFiles]={SamtoolsFlagFilter->"0x704",MinimalReadMappingScore->30,LogStream->False};
+Options[GetReadsFromBamFiles]={SamtoolsFlagFilter->"1796",MinimalReadMappingScore->30,LogStream->False};
 GetReadsFromBamFiles[bamfiles_,inputregion_,OptionsPattern[GetReadsFromBamFiles]]:=Module[{cmd,flbam,types,region,multiregioncalculation,logs,tm,regionbedfile,result},
 
 Switch[bamfiles,_List,flbam=bamfiles,_String,flbam=ReadList["!ls "<>bamfiles,String],_,Return["The bam files are ill-defined"]];
